@@ -1,6 +1,6 @@
 Cell = Maybe Player
 type Board = [[ Cell ]]
-type MiniBoard = [ Maybe Player ]
+type MiniBoard = [ Maybe Player ] --could do an association list to hold a tuple and use lookupVal, game of list of cells or an outcome
 type BigBoard = [MiniBoard] 
 data Player = Cross | Circle deriving (Show, Eq)
 
