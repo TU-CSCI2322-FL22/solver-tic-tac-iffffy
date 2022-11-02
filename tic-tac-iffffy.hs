@@ -1,8 +1,8 @@
+type Cell = Maybe Player
+data Player = Cross | Circle deriving (Show, Eq)
 type Board = [[ Cell ]]
 type MiniBoard = [ Maybe Player ]
 type BigBoard = [MiniBoard] 
-Cell = Maybe Player
-data Player = Cross | Circle deriving (Show, Eq)
 
 type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner]) -– (Maybe Player, BigBoard)
