@@ -7,7 +7,7 @@ type BigBoard = [MiniBoard]
 type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner]) -- (Maybe Player, BigBoard)
 
-Nothing -> let newBoards =  updateWinners x board
+Nothing -> let newBoards = updateWinners x board
            in if thereIsWinner 
               then celebrate
               else waitForNewMove
