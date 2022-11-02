@@ -20,4 +20,6 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
 type Location = (BigBoardIndex :: Int, MiniBoardIndex :: Int)
 
 updateBoardWinners (bigLoc, smallLoc) board =
-    let miniboard = board !! bigLoc
+  let miniboard = board !! bigLoc
+
+
