@@ -21,5 +21,6 @@ type Location = (BigBoardIndex :: Int, MiniBoardIndex :: Int)
 
 updateBoardWinners (bigLoc, smallLoc) board =
   let miniboard = board !! bigLoc
+  
 
 
