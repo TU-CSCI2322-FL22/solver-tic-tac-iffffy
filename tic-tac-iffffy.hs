@@ -15,6 +15,10 @@ type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner])
 type Location = (BigBoardIndex, MiniBoardIndex)
 
+possibleWins = [[0,1,2],[3,4,5],[6,7,8],
+               [0,3,6],[1,4,7],[2,5,8],
+               [0,4,8],[2,4,6]]
+
 gameStateWinner :: GameState -> Player
 gameStateWinner = undefined
 
@@ -30,7 +34,7 @@ checkCell location = undefined
 getLegalMoves :: GameState -> [Location] 
 getLegalMoves = undefined
 
-showGameState :: Show GameState => GameState -> Nothing
+showGameState :: GameState -> BigBoard 
 showGameState = undefined
 
 
@@ -46,11 +50,6 @@ checkCell location =
     cell = getCellOfLocation location
     getCellOfLocation :: Location -> Cell
     getCellOfLocation loc = undefined
-
-possibleWins = [[0,1,2],[3,4,5],[6,7,8],
-               [0,3,6],[1,4,7],[2,5,8],
-               [0,4,8],[2,4,6]]
-
 
 updateWinners :: ??? -> Board -> Board
 updateBoardWinners (bigLoc, smallLoc) board =
