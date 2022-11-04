@@ -2,6 +2,8 @@ main :: IO ()
 main = return ()
 
 data Player = Cross | Circle deriving (Show, Eq)
+type Cell = Maybe Player
+data MiniBoard = Game [Cell] | Winner (Maybe Player)
 type BigBoard = [MiniBoard] 
 type Turn = Player
 type BigBoardIndex = Int
