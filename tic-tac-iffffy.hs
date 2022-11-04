@@ -16,7 +16,7 @@ type Turn = Player
 type BigBoardIndex = Int
 type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
-data Outcome = Win Player | Ongoing | Tie deriving (Show, Eq)
+data Outcome = Win Player | Ongoing BigBoard | Tie deriving (Show, Eq)
 type Location = (BigBoardIndex, MiniBoardIndex)
 
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
@@ -29,8 +29,14 @@ gameStateWinner = undefined
 makeMove :: GameState -> GameState
 makeMove = undefined
 
-getCellOfLocation :: Location -> Cell --checkCell helper, use in legal moves 
-getCellOfLocation loc = undefined
+getCellOfLocation :: Location -> GameState -> Either Cell Outcome
+getCellOfLocation (bigIndex, miniIndex) (_,bboard)
+  | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = error "IndexOutOfBound in getCellOfLocation"
+  | otherwise =
+      case (bboard !! bigIndex) of 
+        Game cells -> Left $ cells !! miniIndex
+        Winner Nothing        -> Right Tie
+        Winner (Just player)  -> Right (Win player)
 
 checkCell :: Location -> Bool -- legal move helper
 checkCell location = undefined
