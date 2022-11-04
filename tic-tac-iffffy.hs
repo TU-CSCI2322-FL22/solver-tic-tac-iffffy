@@ -1,14 +1,21 @@
-Cell = Maybe Player
+main :: IO ()
+main = return ()
 
-type Board = [[ Cell ]]
-type MiniBoard = [ Maybe Player ] --could do an association list to hold a tuple and use lookupVal, game of list of cells or an outcome
-type BigBoard = [MiniBoard] 
 data Player = Cross | Circle deriving (Show, Eq)
+type Cell = Maybe Player
+data MiniBoard = Game [Cell] | Winner (Maybe Player)
+type BigBoard = [MiniBoard] 
+type Turn = Player
+type BigBoardIndex = Int
+type MiniBoardIndex = Int
+type GameState = (Turn, BigBoard)
+type Outcome = (Player, MiniBoard)
 
-type MBWinner = (Maybe Player, MiniBoard) 
-type BBWinner =  (Maybe Player, [MBWinner]) -- (Maybe Player, BigBoard)
-type Location = (BigBoardIndex :: Int, MiniBoardIndex :: Int)
+type MBWinner = (Maybe Player, MiniBoard)
+type BBWinner =  (Maybe Player, [MBWinner])
+type Location = (BigBoardIndex, MiniBoardIndex)
 
+{-
 checkCell :: Location -> ???
 checkCell location = 
   case cell of Nothing -> let newBoards = updateWinners x board
@@ -29,3 +36,4 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
 updateWinners :: ??? -> Board -> Board
 updateBoardWinners (bigLoc, smallLoc) board =
   let miniboard = board !! bigLoc
+-}
