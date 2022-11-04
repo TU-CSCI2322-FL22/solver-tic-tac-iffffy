@@ -33,7 +33,12 @@ getCellOfLocation :: Location -> Cell --checkCell helper, use in legal moves
 getCellOfLocation loc = undefined
 
 checkCell :: Location -> Bool -- legal move helper
-checkCell location = undefined
+checkCell location = 
+  let cell = getCellOfLocation location
+  in case cell of
+          Nothing -> True
+          _ -> False    
+                              
 {-
 case cell of Nothing -> let newBoards = updateWinners x board
                           in if thereIsWinner 
