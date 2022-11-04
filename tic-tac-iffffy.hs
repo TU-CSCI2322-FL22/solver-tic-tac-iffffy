@@ -6,14 +6,24 @@ type Cell = Maybe Player
 data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
 type BigBoard = [MiniBoard] 
 type Turn = Player
-type BigBoardIndex = Int
-type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
 type Outcome = (Player, MiniBoard)
 
 type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner])
-type Location = (BigBoardIndex, MiniBoardIndex)
+type Location = (Int, Int)
+
+gameStateWinner :: GameState -> Player
+gameStateWinner = undefined
+
+makeMove :: GameState -> GameState
+makeMove = undefined
+
+getLegalMoves :: GameState -> [Location] --use checkCell as helper
+getLegalMoves = undefined
+
+showGameState :: GameState -> Nothing
+showGameState = undefined
 
 
 {-
