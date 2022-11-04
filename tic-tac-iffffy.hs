@@ -30,7 +30,7 @@ checkCell location = undefined
 getLegalMoves :: GameState -> [Location] 
 getLegalMoves = undefined
 
-showGameState :: GameState -> Nothing
+showGameState :: Show GameState => GameState -> Nothing
 showGameState = undefined
 
 
