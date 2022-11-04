@@ -30,6 +30,15 @@ getCellOfLocation loc = undefined
 
 checkCell :: Location -> Bool -- legal move helper
 checkCell location = undefined
+{-
+case cell of Nothing -> let newBoards = updateWinners x board
+                          in if thereIsWinner 
+                            then celebrate
+                            else waitForNewMove
+             Just x  -> error "Overwriting move"
+  where 
+    cell = getCellOfLocation location 
+  -}
 
 getLegalMoves :: GameState -> [Location] 
 getLegalMoves = undefined
@@ -37,21 +46,3 @@ getLegalMoves = undefined
 showGameState :: GameState -> BigBoard 
 showGameState = undefined
 
-
-{-
-checkCell :: Location -> ???
-checkCell location = 
-  case cell of Nothing -> let newBoards = updateWinners x board
-                          in if thereIsWinner 
-                            then celebrate
-                            else waitForNewMove
-               Just x  -> error "Overwriting move"
-  where 
-    cell = getCellOfLocation location
-    getCellOfLocation :: Location -> Cell
-    getCellOfLocation loc = undefined
-
-updateWinners :: ??? -> Board -> Board
-updateBoardWinners (bigLoc, smallLoc) board =
-  let miniboard = board !! bigLoc
--}
