@@ -6,12 +6,14 @@ type Cell = Maybe Player
 data MiniBoard = Game [Cell] | Winner (Maybe Player)
 type BigBoard = [MiniBoard] 
 type Turn = Player
+type BigBoardIndex = Int
+type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
 type Outcome = (Player, MiniBoard)
 
 type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner])
-type Location = (Int, Int)
+type Location = (BigBoardIndex, MiniBoardIndex)
 
 {-
 checkCell :: Location -> ???
