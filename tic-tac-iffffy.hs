@@ -13,6 +13,18 @@ type MBWinner = (Maybe Player, MiniBoard)
 type BBWinner =  (Maybe Player, [MBWinner])
 type Location = (Int, Int)
 
+gameStateWinner :: GameState -> Player
+gameStateWinner = undefined
+
+makeMove :: GameState -> GameState
+makeMove = undefined
+
+getLegalMoves :: GameState -> [Location]
+getLegalMoves = undefined
+
+showGameState :: GameState -> Nothing
+showGameState = undefined
+
 {-
 checkCell :: Location -> ???
 checkCell location = 
