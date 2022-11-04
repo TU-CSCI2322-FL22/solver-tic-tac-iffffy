@@ -19,7 +19,7 @@ gameStateWinner = undefined
 makeMove :: GameState -> GameState
 makeMove = undefined
 
-getLegalMoves :: GameState -> [Location]
+getLegalMoves :: GameState -> [Location] --use checkCell as helper
 getLegalMoves = undefined
 
 showGameState :: GameState -> Nothing
