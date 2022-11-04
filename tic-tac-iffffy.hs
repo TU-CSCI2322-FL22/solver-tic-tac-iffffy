@@ -12,7 +12,7 @@ data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
 type BigBoard = [MiniBoard] 
 type Turn = Player
 -- Cursor parking [ | M | J😩 | K 🥵| R | L | ]
--- Cursor cafe [🍊 ]
+-- Cursor cafe [🍊 🥐 🥗 🍰 🥪]
 type BigBoardIndex = Int
 type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
