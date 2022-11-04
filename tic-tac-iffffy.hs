@@ -19,7 +19,13 @@ gameStateWinner = undefined
 makeMove :: GameState -> GameState
 makeMove = undefined
 
-getLegalMoves :: GameState -> [Location] --use checkCell as helper
+getCellOfLocation :: Location -> Cell --checkCell helper, use in legal moves 
+getCellOfLocation loc = undefined
+
+checkCell :: Location -> Bool -- legal move helper
+checkCell location = undefined
+
+getLegalMoves :: GameState -> [Location] 
 getLegalMoves = undefined
 
 showGameState :: GameState -> Nothing
