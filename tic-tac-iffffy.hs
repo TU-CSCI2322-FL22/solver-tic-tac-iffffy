@@ -5,7 +5,7 @@ type MiniBoard = [ Maybe Player ] --could do an association list to hold a tuple
 type BigBoard = [MiniBoard] 
 data Player = Cross | Circle deriving (Show, Eq)
 
-type MBWinner = (Maybe Player, MiniBoard)
+type MBWinner = (Maybe Player, MiniBoard) 
 type BBWinner =  (Maybe Player, [MBWinner]) -- (Maybe Player, BigBoard)
 type Location = (BigBoardIndex :: Int, MiniBoardIndex :: Int)
 
