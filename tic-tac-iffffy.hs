@@ -26,8 +26,19 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
 gameStateWinner :: GameState -> Outcome
 gameStateWinner = undefined
 
-makeMove :: GameState -> GameState
-makeMove = undefined
+makeMove :: GameState -> Maybe Location -> GameState
+makeMove (Cross, bboard) (Just loc) = -- for human player
+  case checkCell loc of 
+    True -> undefined
+    False -> error "Illegal move"
+makeMove (Circle, bboard) Nothing = -- for computer turn
+  let loc = bestLoc bboard
+  in undefined
+
+  where bestLoc :: BigBoard -> Location
+        bestLoc bboard = undefined
+
+
 
 getCellOfLocation :: Location -> GameState -> Either Cell Outcome
 getCellOfLocation (bigIndex, miniIndex) (_,bboard)
