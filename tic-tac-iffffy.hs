@@ -1,12 +1,12 @@
 import Data.List
-import Data.List.Split
+import Data.List.Split (chunksOf, splitOn)
 import Data.Maybe
 import Debug.Trace
 
 main :: IO ()
 main = return ()
 
-data Player = Cross | Circle deriving (Show, Eq)
+data Player = Cross | Circle deriving (Eq)
 type Cell = Maybe Player
 data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
 type BigBoard = [MiniBoard] 
@@ -64,5 +64,39 @@ case cell of Nothing -> let newBoards = updateWinners x board
 getLegalMoves :: GameState -> [Location] 
 getLegalMoves = undefined
 
+emptyBoard = take 9 $ repeat (Game $ take 9 $ repeat Nothing)
+allXBoard = take 9 $ repeat (Game $ take 9 $ repeat (Just Cross))
+
 showGameState :: GameState -> String --BigBoard 
-showGameState = undefined
+showGameState (turn, bigboard) = unlines ["Current turn: " ++ show turn ++ "\n", showBigBoard bigboard]
+
+instance Show Player where
+  show Cross  = " x "
+  show Circle = " o "
+
+-- data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
+
+showMiniBoard :: String -> MiniBoard -> String
+showMiniBoard sep (Game cells) = 
+  intercalate sep $ map (intercalate "|") $ chunksOf 3 $ map showFor cells
+  where showFor :: Cell -> String
+        showFor Nothing = "   "
+        showFor (Just player) = show player
+        
+showMiniBoard sep (Winner Nothing) = 
+  let cells = take 9 $ repeat "Tie"
+  in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
+
+showMiniBoard sep (Winner (Just p)) = 
+  let cells = take 9 $ repeat $ show p
+  in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
+  
+showBigBoard :: BigBoard -> String
+showBigBoard miniBoards = 
+  let panels = chunksOf 3 miniBoards
+      panelSeparator = '\n':(take 37 (repeat '-') ++"\n")
+  in (intercalate panelSeparator $ map printPanel panels) ++ "\n"
+  where printPanel :: [MiniBoard] -> String
+        printPanel panel = 
+          intercalate "\n" $ map (intercalate "||") $ transpose $ map (splitOn "\n") $ map (showMiniBoard "\n") panel
+      
