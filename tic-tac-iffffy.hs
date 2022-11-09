@@ -32,7 +32,7 @@ miniWinner player mb = didIWin (squaresFor player mb)
 
 didIWin :: [Int] -> Bool
 didIWin indices = 
-  or (map (\x -> all (`elem` indices) x) possibleWins)
+  any (all (`elem` indices)) possibleWins
 
 winnersFor :: Player -> BigBoard -> [Int]
 winnersFor player bb = [ loc | (loc, piece) <- zip [0..] bb, miniWinner player piece ]
