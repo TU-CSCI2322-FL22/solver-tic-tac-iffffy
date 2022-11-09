@@ -71,7 +71,7 @@ checkCell location gs =
           Left (Just player) -> False
 
 getLegalMoves :: GameState -> [Location] 
-getLegalMoves = undefined --zip bigboard with bigboard indexes and zip miniboard with miniboard indexes 
+getLegalMoves gameState = undefined --zip bigboard with bigboard indexes and zip miniboard with miniboard indexes 
 
 emptyBoard = take 9 $ repeat (Game $ take 9 $ repeat Nothing)
 allXBoard = take 9 $ repeat (Game $ take 9 $ repeat (Just Cross))
