@@ -45,11 +45,11 @@ updateMatrix m x (r,c) =
     drop (r + 1) m
 
 makeMove :: GameState -> Location -> GameState -- made a few edits, removed maybe and added nothing
-makeMove (Cross, bboard) (Just loc) = -- for human player
+makeMove (Cross, bboard) (loc) = -- for human player
   case checkCell loc (Cross, bboard) of 
     True -> (Circle, updateMatrix bboard Cross loc)
     False -> Nothing
-makeMove (Circle, bboard) (Just loc) = -- for other turn
+makeMove (Circle, bboard) (loc) = -- for other turn
   case checkCell loc (Circle, bboard) of 
     True -> (Cross, updateMatrix bboard Circle loc)
     False -> Nothing
