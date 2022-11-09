@@ -32,19 +32,16 @@ miniWinner player mb = didIWin (squaresFor player mb)
 
 didIWin :: [Int] -> Bool
 didIWin indices = 
-  True `elem` (map (\x -> all (`elem` indices) x) possibleWins)
+  or (map (\x -> all (`elem` indices) x) possibleWins)
 
 winnersFor :: Player -> BigBoard -> [Int]
 winnersFor player bb = [ loc | (loc, piece) <- zip [0..] bb, miniWinner player piece ]
 
 gameStateWinner :: GameState -> Outcome
-gameStateWinner (turn, bigBoard) =
-  if didIWin (winnersFor turn bigBoard) 
-    then Win turn
-  else 
-    if didIWin (winnersFor (anotherTurn turn) bigBoard) 
-    then Win (anotherTurn)
-    else Ongoing bigBoard -- How to determine Tie
+gameStateWinner (turn, bigBoard) 
+  | didIWin (winnersFor turn bigBoard) = Win turn
+  | didIWin (winnersFor (anotherTurn turn) bigBoard) = Win (anotherTurn turn)
+  | otherwise  = Ongoing bigBoard -- How to determine Tie
 
 {-
 updateMatrix m x (r,c) =
