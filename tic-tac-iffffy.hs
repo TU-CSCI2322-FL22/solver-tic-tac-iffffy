@@ -8,7 +8,7 @@ main = return ()
 
 data Player = Cross | Circle deriving (Eq)
 type Cell = Maybe Player
-data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
+data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Eq)
 type BigBoard = [MiniBoard] 
 type Turn = Player
 -- Cursor parking [ | M | J😩 | K 🥵| R | L | ]
@@ -23,12 +23,13 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
                [0,4,8],[2,4,6]]
 
-xSquares :: Player -> MiniBoard -> [Int]
-xSquares pl mb = [loc | (loc, piece) < zip [0..]mb, piece == Just pl]
+squareFor :: Player -> MiniBoard -> [Int]
+squareFor pl mb = [loc | (loc, piece) < zip [0..]mb, piece == Just pl]
 
-xWins miniBoard = any (`subseteq` (squareFor X miniboard)) possibleWins
+xWins miniBoard = any (`subseteq` (squareFor x miniboard)) possibleWins
 
-winnersFor :: Player -> Bigboard -> [Int]
+winnersFor :: Player -> BigBoard -> [Int]
+winnersFor = undefined
 --just like squaresFor, but check for squares the player has won
 
 
@@ -48,7 +49,7 @@ makeMove (Cross, bboard) (Just loc) = -- for human player
   case checkCell loc (Cross, bboard) of 
     True -> (Circle, updateMatrix bboard Cross loc)
     False -> Nothing
-makeMove (Circle, bboard) Nothing = -- for other turn
+makeMove (Circle, bboard) (Just loc) = -- for other turn
   case checkCell loc (Circle, bboard) of 
     True -> (Cross, updateMatrix bboard Circle loc)
     False -> Nothing
@@ -79,7 +80,7 @@ showGameState :: GameState -> String --BigBoard
 showGameState (turn, bigboard) = unlines ["Current turn: " ++ show turn ++ "\n", showBigBoard bigboard]
 
 
-showFor =
+--showFor =
 --Show Player = --or something
  -- show Cross  = " x "
  -- show Circle = " o "
