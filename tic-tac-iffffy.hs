@@ -23,13 +23,13 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
                [0,4,8],[2,4,6]]
 
-squareFor :: Player -> MiniBoard -> [Int]
-squareFor pl mb = [loc | (loc, piece) < zip [0..]mb, piece == Just pl]
+--squareFor :: Player -> MiniBoard -> [Int]
+--squareFor pl mb = [loc | (loc, piece) < zip [0..]mb, piece == Just pl]
 
-xWins miniBoard = any (`subseteq` (squareFor x miniboard)) possibleWins
+--xWins miniBoard = any (`subseteq` (squareFor x miniboard)) possibleWins
 
-winnersFor :: Player -> BigBoard -> [Int]
-winnersFor = undefined
+--winnersFor :: Player -> BigBoard -> [Int]
+--winnersFor = undefined
 --just like squaresFor, but check for squares the player has won
 
 
