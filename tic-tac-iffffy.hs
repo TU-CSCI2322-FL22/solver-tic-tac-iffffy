@@ -50,7 +50,7 @@ case cell of Nothing -> let newBoards = updateWinners x board
   -}
 
 getLegalMoves :: GameState -> [Location] 
-getLegalMoves = undefined
+getLegalMoves = undefined --zip bigboard with bigboard indexes and zip miniboard with miniboard indexes 
 
 showGameState :: GameState -> String --BigBoard 
 showGameState = undefined
