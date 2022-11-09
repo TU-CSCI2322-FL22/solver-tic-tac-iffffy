@@ -16,12 +16,22 @@ type Turn = Player
 type BigBoardIndex = Int
 type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
-data Outcome = Win Player | Ongoing BigBoard | Tie deriving (Eq)
+data Outcome = Win Player | Ongoing | Tie deriving (Eq) -- ongoing is property of bigboard
 type Location = (BigBoardIndex, MiniBoardIndex)
 
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
                [0,4,8],[2,4,6]]
+
+xSquares :: Player -> MiniBoard -> [Int]
+xSquares pl mb = [loc | (loc, piece) < zip [0..]mb, piece == Just pl]
+
+xWins miniBoard = any (`subseteq` (squareFor X miniboard)) possibleWins
+
+winnersFor :: Player -> Bigboard -> [Int]
+--just like squaresFor, but check for squares the player has won
+
+
 
 gameStateWinner :: GameState -> Outcome
 gameStateWinner = undefined
@@ -33,19 +43,17 @@ updateMatrix m x (r,c) =
     [Game $ take (c-1) cellsAtC ++ [Just x] ++ drop (c + 1) cellsAtC] ++
     drop (r + 1) m
 
-makeMove :: GameState -> Maybe Location -> GameState
+makeMove :: GameState -> Location -> GameState -- made a few edits, removed maybe and added nothing
 makeMove (Cross, bboard) (Just loc) = -- for human player
   case checkCell loc (Cross, bboard) of 
     True -> (Circle, updateMatrix bboard Cross loc)
-    False -> error "Illegal move"
-makeMove (Circle, bboard) Nothing = -- for computer turn
-  let loc = bestLoc bboard
-  in undefined
+    False -> Nothing
+makeMove (Circle, bboard) Nothing = -- for other turn
+  case checkCell loc (Circle, bboard) of 
+    True -> (Cross, updateMatrix bboard Circle loc)
+    False -> Nothing
 
-  where bestLoc :: BigBoard -> Location
-        bestLoc bboard = undefined 
-
-getCellOfLocation :: Location -> GameState -> Either Cell Outcome
+getCellOfLocation :: Location -> GameState -> Either Cell Outcome --needs to return maybe for check cell
 getCellOfLocation (bigIndex, miniIndex) (_,bboard)
   | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = error "IndexOutOfBound in getCellOfLocation"
   | otherwise =
@@ -54,7 +62,7 @@ getCellOfLocation (bigIndex, miniIndex) (_,bboard)
         Winner Nothing        -> Right Tie
         Winner (Just player)  -> Right (Win player)
 
-checkCell :: Location -> GameState -> Bool
+checkCell :: Location -> GameState -> Bool -- do bounds checking in here to retun false so code doesnt crash
 checkCell location gs = 
   case getCellOfLocation location gs of 
           Right _ -> False
@@ -70,9 +78,11 @@ allXBoard = take 9 $ repeat (Game $ take 9 $ repeat (Just Cross))
 showGameState :: GameState -> String --BigBoard 
 showGameState (turn, bigboard) = unlines ["Current turn: " ++ show turn ++ "\n", showBigBoard bigboard]
 
-instance Show Player where
-  show Cross  = " x "
-  show Circle = " o "
+
+showFor =
+--Show Player = --or something
+ -- show Cross  = " x "
+ -- show Circle = " o "
 
 -- data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
 
