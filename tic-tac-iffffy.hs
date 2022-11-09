@@ -68,7 +68,9 @@ emptyBoard = take 9 $ repeat (Game $ take 9 $ repeat Nothing)
 allXBoard = take 9 $ repeat (Game $ take 9 $ repeat (Just Cross))
 
 showGameState :: GameState -> String --BigBoard 
-showGameState (turn, bigboard) = unlines ["Current turn: " ++ show turn ++ "\n", showBigBoard bigboard]
+showGameState (turn, bigboard) = 
+  let header = "   0   1   2    3   4   5    6   7   8 " -- "  "++(intercalate "   " $ map show [0..8])
+  in unlines ["\nCurrent turn: " ++ show turn ++ "\n", header , showBigBoard bigboard]
 
 instance Show Player where
   show Cross  = " x "
@@ -94,9 +96,12 @@ showMiniBoard sep (Winner (Just p)) =
 showBigBoard :: BigBoard -> String
 showBigBoard miniBoards = 
   let panels = chunksOf 3 miniBoards
-      panelSeparator = '\n':(take 37 (repeat '-') ++"\n")
-  in (intercalate panelSeparator $ map printPanel panels) ++ "\n"
+      panelSeparator = "  \n" ++ (take 37 (repeat '-')) ++"\n"
+      labels = ["0","1","2"," ","3","4","5"," ","6","7","8"]
+  in unlines $ addIndex labels (splitOn "\n" $ intercalate panelSeparator $ map printPanel panels)
   where printPanel :: [MiniBoard] -> String
         printPanel panel = 
           intercalate "\n" $ map (intercalate "||") $ transpose $ map (splitOn "\n") $ map (showMiniBoard "\n") panel
-      
+
+addIndex :: [String] -> [String] -> [String] 
+addIndex ind lst = map (\(n,s) -> n++" "++s) $ zip ind lst
