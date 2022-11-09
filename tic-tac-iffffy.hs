@@ -32,7 +32,7 @@ makeMove = undefined
 getCellOfLocation :: Location -> Cell --checkCell helper, use in legal moves 
 getCellOfLocation loc = undefined
 
-checkCell :: Location -> Bool -- legal move helper
+checkCell :: Location -> Bool -- legal move helper, need to include gamestate
 checkCell location = 
   let cell = getCellOfLocation location
   in case cell of
