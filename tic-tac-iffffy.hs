@@ -39,6 +39,11 @@ updateMatrix m x (r,c) =
        (start, (Game cellsAtC):rest) -> start ++ [Game $ take (c-1) cellsAtC ++ [Just x] ++ drop (c + 1) cellsAtC]  ++ rest
        _ -> error "invalid updateMatrix, should never happen."
 
+updateMiniGame c x cellsAtC =
+  case splitAt c cellsAtC of
+       (start, sq:rest) -> Game $ start++ [Just x] ++ rest
+       _ -> error "AAAAH BAD THINGS"
+
 makeMove :: GameState -> Location -> GameState
 makeMove (Cross, bboard) loc = -- for human player
   case checkCell loc (Cross, bboard) of 
