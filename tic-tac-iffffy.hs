@@ -84,8 +84,8 @@ getCellOfLocation (bigIndex, miniIndex) (_,bboard)
 checkCell :: Location -> GameState -> Bool -- do bounds checking in here to return false so code doesnt crash
 checkCell location gs = 
   case getCellOfLocation location gs of 
-          Right _ -> False
-          Left (Nothing) -> True
+          Right _            -> False
+          Left Nothing       -> True
           Left (Just player) -> False
 
 getLegalMoves :: GameState -> [Location] 
