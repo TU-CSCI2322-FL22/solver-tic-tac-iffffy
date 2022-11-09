@@ -27,24 +27,34 @@ gameStateWinner :: GameState -> Outcome
 gameStateWinner = undefined
 
 updateMatrix :: BigBoard -> Turn -> Location -> BigBoard
+{-
 updateMatrix m x (r,c) =
   let (Game cellsAtC) = m !! r 
   in take r m ++
     [Game $ take (c-1) cellsAtC ++ [Just x] ++ drop (c + 1) cellsAtC] ++
     drop (r + 1) m
+-}
+updateMatrix m x (r,c) = 
+  case (splitAt r m) of
+       (start, (Game cellsAtC):rest) -> start ++ [Game $ take (c-1) cellsAtC ++ [Just x] ++ drop (c + 1) cellsAtC]  ++ rest
+       _ -> error "invalid updateMatrix, should never happen."
 
-makeMove :: GameState -> Maybe Location -> GameState
-makeMove (Cross, bboard) (Just loc) = -- for human player
+makeMove :: GameState -> Location -> GameState
+makeMove (Cross, bboard) loc = -- for human player
   case checkCell loc (Cross, bboard) of 
     True -> (Circle, updateMatrix bboard Cross loc)
     False -> error "Illegal move"
-makeMove (Circle, bboard) Nothing = -- for computer turn
+makeMove (Circle, bboard) loc = -- for computer turn
+  case checkCell loc (Circle, bboard) of 
+    True -> (Cross , updateMatrix bboard Circle loc)
+    False -> error "Illegal move"
+{-  
   let loc = bestLoc bboard
   in undefined
 
   where bestLoc :: BigBoard -> Location
         bestLoc bboard = undefined 
-
+-}
 getCellOfLocation :: Location -> GameState -> Either Cell Outcome
 getCellOfLocation (bigIndex, miniIndex) (_,bboard)
   | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = error "IndexOutOfBound in getCellOfLocation"
