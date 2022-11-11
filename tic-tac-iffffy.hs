@@ -166,9 +166,18 @@ showBigBoard bigBoard =
 ----------------
                       ----- Milestone 2 -----
 --simple interface--
-readGame :: String -> GameState       --Reads the game state from file
-readGame str = undefined
+-- readGame :: String -> GameState       --Reads the game state from file
+-- readGame str
+-- str
+--   | str == "Cross;_" = (Cross,[])
+--   | str == "Circle;_" = (Circle,[])
+--   | otherwise = 
+--     let stuff = head splitOn ";" str
+--         newstuff = tail splitOn ";" str
+--     in (stuff,newstuff)
 --insert a string with a turn and bigboard
+--bigBoard is a list of miniboards, which is a list of cells
+--pseudocode:
 
 showGame :: GameState -> String       --Shows the file
 showGame = undefined -- showGameState "" 
@@ -183,11 +192,54 @@ loadGame path = undefined -- let context <- readFile path in context
 putWinner :: GameState -> IO () --computes and prints winning move
 putWinner = undefined
 
-bestLocalMove :: GameState -> Location
-bestLocalMove gas = undefined -- let moves = getLegalMoves gs
 
-whoWillWin :: GameState -> Outcome
+--split whoWillWin into helper functions: critical and gain win
+--the problem is being split like this because we need to check two conditions:
+--1: the current sign (circle or cross) needs to block their opponent from winning on their next turn
+--2: look for the best possible winning conditions 
+
+critical :: GameState -> ([Location],[Location]) --Checks for moves that help guarantee a win for the player 3
+critical gas =                      --for some reason gameState is now called "gas", thanks Raven lol
+  let (turn, bigBoard) = gas
+      (states, miniBoards) = unzip bigBoard
+      noWinnerBigIndices = [ x |(x,y) <- zip [0..8] states, isNothing y]
+      possibleMoves = [ (x,y) | (x,y) <- getLegalMoves gas, x `elem` noWinnerBigIndices]
+      (miniWinMoves, bigWinMoves) =
+        foldl (\lst loc -> 
+                         let (newStates,_) = unzip (updateMatrix bigBoard turn loc) 
+                             miniList = if newStates /= states then loc:fst lst else fst lst
+                             bigList = if didIWin [ index | (index,state) <- zip [0..8] newStates, state == Just turn]
+                                      then loc:fst lst else fst lst              
+                          in (miniList, bigList) 
+                               ) ([],[]) possibleMoves
+  in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
+  
+sortCriticalOfMiniBoards :: GameState -> [Location] -> [Location]
+-- sort the locations according to best places to build win (a.k.a second mark)
+sortCriticalOfMiniBoards _ [] = []
+sortCriticalOfMiniBoards gas locations = undefined
+  
+  where goodSecondPlaces :: [Int] -> [Int] -> ([Int],[Int])
+  -- return
+        goodSecondPlaces enemyIndices myIndices = 
+          let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
+          in case filter (\x -> (any (`elem` myIndices) x) && not (any (`elem` enemyIndices) x)) possibleWins  of
+            []                  -> ([], remaining)
+            currentPossibleWins -> undefined--map (\lst -> (head lst, length lst)) $ filter (`elem` remaining) $ groupBy (==) $ concat currentPossibleWins
+
+
+--call gamestatewinner after we make a move in order to double check
+whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
 whoWillWin = undefined
 
 bestMove :: GameState -> Player
 bestMove = undefined
+-- first check critical of enemy (fakeGas = (enemy, bigBoard))
+-- if return critical == ([],[])
+-- then check critical for me (gas)
+-- prioritzie critical locations where I'll win bboard, if bboard loc == [], get loc of miniboard to maximize win.
+
+
+-- checks the best second location for player on miniboard assuming there are no good first locations
+bestSndLocation locs player mb = let sqs = squaresFor player mb 
+                                 in [[[loc | sq <- sqs, sq `elem` win] | win <- possibleWins, loc `elem` win] | loc <- locs]
