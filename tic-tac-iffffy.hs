@@ -3,6 +3,7 @@ import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import TysPrim (threadIdPrimTyCon)
+import GhcPlugins (boxingDataCon_maybe, xFlags)
 
 main :: IO ()
 main = return ()
@@ -245,9 +246,19 @@ whoWillWin = undefined
                     -- if equals?
                     -- if both == 0?
 
-bestMove :: GameState -> Player
-bestMove = undefined
--- then check critical for me to win the whole game
+bestMove :: GameState -> Location
+bestMove (turn, bigBoard)= 
+  let enemy = anotherTurn turn
+      (iDontWin,iWin) = critical (turn,bigBoard)
+  in case iWin of 
+    x:xs  -> x
+    [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
+          in case enemyWin of
+            [x]   -> x
+            x:xs  -> x -- can I surrender :) enemy has more than 1 way to win bigBoard
+            []    -> head iDontWin 
+
+-- First check critical for me to see if I can win the whole game by 1 step
 -- if I cannot win now, then
 -- first check critical of enemy (fakeGas = (enemy, bigBoard))
 -- if enemy also cannot win now
