@@ -223,10 +223,10 @@ sortCriticalOfMiniBoards gas locations = undefined
   -- return
         goodSecondPlaces enemyIndices myIndices = 
           let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
-          in case filter (\x -> (any (`elem` myIndices) x) && not (any (`elem` enemyIndices) x)) possibleWins  of
+          in case filter (\x -> any (`elem` myIndices) x && not (any (`elem` enemyIndices) x)) possibleWins  of
             []                  -> ([], remaining)
-            currentPossibleWins -> undefined--map (\lst -> (head lst, length lst)) $ filter (`elem` remaining) $ groupBy (==) $ concat currentPossibleWins
-
+            currentPossibleWins -> let good = filter (`elem` remaining) $ fst $ unzip $ last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins
+                                   in (good, filter (`notElem` good) remaining)
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
