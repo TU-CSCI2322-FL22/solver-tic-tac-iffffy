@@ -217,27 +217,42 @@ critical gas =                      --for some reason gameState is now called "g
 sortCriticalOfMiniBoards :: GameState -> [Location] -> [Location]
 -- sort the locations according to best places to build win (a.k.a second mark)
 sortCriticalOfMiniBoards _ [] = []
-sortCriticalOfMiniBoards gas locations = undefined
-  
-  where goodSecondPlaces :: [Int] -> [Int] -> ([Int],[Int])
-  -- return
-        goodSecondPlaces enemyIndices myIndices = 
-          let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
-          in case filter (\x -> any (`elem` myIndices) x && not (any (`elem` enemyIndices) x)) possibleWins  of
-            []                  -> ([], remaining)
-            currentPossibleWins -> let good = filter (`elem` remaining) $ fst $ unzip $ last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins
-                                   in (good, filter (`notElem` good) remaining)
+sortCriticalOfMiniBoards (turn,bigBoard) locations = 
+  let enemyIndices = winnersFor (anotherTurn turn) bigBoard
+      myIndices = winnersFor turn bigBoard
+      orderOfBigIndices = goodSecondPlaces enemyIndices myIndices
+  in sortWithOrder orderOfBigIndices locations
+  where sortWithOrder :: [BigBoardIndex] -> [Location] -> [Location]
+        sortWithOrder lst locs = concat [ filter (\(x,y) -> x == i) locs | i <- lst ]
+
+goodSecondPlaces :: [Int] -> [Int] -> [Int]
+goodSecondPlaces enemyIndices myIndices = 
+  -- In case of no location leads to direct win, this generate list of locations 
+  -- where the first one(s) is the best move according to number of winning path it can open
+  let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
+      currentPossibleWins =
+        case filter (\x -> any (`elem` myIndices) x && not (any (`elem` enemyIndices) x)) possibleWins  of
+            [] -> possibleWins
+            x -> x 
+      good = filter (`elem` remaining) $ fst $ unzip $ last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins
+  in good ++ filter (`notElem` good) remaining
+                            
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
 whoWillWin = undefined
+-- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
+                    -- if equals?
+                    -- if both == 0?
 
 bestMove :: GameState -> Player
 bestMove = undefined
+-- then check critical for me to win the whole game
+-- if I cannot win now, then
 -- first check critical of enemy (fakeGas = (enemy, bigBoard))
--- if return critical == ([],[])
--- then check critical for me (gas)
--- prioritzie critical locations where I'll win bboard, if bboard loc == [], get loc of miniboard to maximize win.
+-- if enemy also cannot win now
+-- check get loc of miniboard to maximize win.
+
 
 
 -- checks the best second location for player on miniboard assuming there are no good first locations
