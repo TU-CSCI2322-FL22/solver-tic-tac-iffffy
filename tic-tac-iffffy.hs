@@ -184,7 +184,7 @@ putWinner :: GameState -> IO () --computes and prints winning move
 putWinner = undefined
 
 bestLocalMove :: GameState -> Location
-bestLocalMove gas = undefined -- let moves = getLegalMoves 
+bestLocalMove gas = undefined -- let moves = getLegalMoves gs
 
 whoWillWin :: GameState -> Outcome
 whoWillWin = undefined
