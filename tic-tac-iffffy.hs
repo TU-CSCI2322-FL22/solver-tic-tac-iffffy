@@ -2,14 +2,15 @@ import Data.List
 import Data.List.Split
 import Data.Maybe
 import Debug.Trace
+import TysPrim (threadIdPrimTyCon)
 
 main :: IO ()
 main = return ()
 
 data Player = Cross | Circle deriving (Show, Eq)
 type Cell = Maybe Player
-data MiniBoard = Game [Cell] | Winner (Maybe Player) deriving (Show, Eq)
-type BigBoard = [MiniBoard]
+newtype MiniBoard = Game [Cell] deriving (Show, Eq) --Miniboard will be a bunch of cells
+type BigBoard = [(Maybe Player, MiniBoard)]         --Bigboard will be a list of tuples that remembers who wins in the Miniboard
 type Turn = Player
 -- Cursor parking [ | M | J😩 | K 🥵| R | L | ]
 -- Cursor cafe [🍊 🥐 🥗 🍰 🥪]
@@ -27,7 +28,6 @@ possibleWins = [[0,1,2],[3,4,5],[6,7,8],
 -- return the list of MiniBoardIndex (a.k.a cell location in MiniBoard) where the player has filled.
 squaresFor :: Player ->  MiniBoard -> [Int]
 squaresFor player (Game mb) = [ loc | (loc, piece) <- zip [0..] mb, piece == Just player]
-squaresFor player (Winner p) = error "Shouldn't reach here"
 
 -- determine winner of a miniboard
 -- return whether the player win the miniBoard
@@ -41,8 +41,10 @@ didIWin indices =
 
 -- return the list of BigBoardIndices (a.k.a miniBoard location in BigBoard) where the player has won.
 winnersFor :: Player -> BigBoard -> [Int]
-winnersFor player bb = [ loc | (loc, piece) <- zip [0..] bb, miniWinner player piece ]
-
+winnersFor player bboard =
+  let (states, _) = unzip bboard
+  in [ loc | (loc, piece) <- zip [0..] states, piece == Just player ]
+  
 -- return the outcome of the game at that game-state
 gameStateWinner :: GameState -> Maybe Outcome -- needs to return maybe outcome
 gameStateWinner (turn, bigBoard)
@@ -59,13 +61,13 @@ cannotWinAtAll p bigBoard =
   null (getLegalMoves (p,bigBoard)) 
     && not (didIWin (winnersFor Cross bigBoard) && didIWin (winnersFor Circle bigBoard))
 
-cannotWinMiniBoard :: Player -> MiniBoard -> Bool
--- Determine if the player still have chance to win the mini board
-cannotWinMiniBoard p (Game miniBoard) =
-  -- currently, this return True if there exist no empty cell and both players did not win
-  not any (==Nothing) miniBoard
-    && not (didIWin (squaresFor Cross miniBoard) && didIWin (squaresFor Circle min a a))
-cannotWinMiniBoard p (Winner _) = False
+-- cannotWinMiniBoard :: Player -> MiniBoard -> Bool
+-- -- Determine if the player still have chance to win the mini board
+-- cannotWinMiniBoard p (Game miniBoard) =
+--   -- currently, this return True if there exist no empty cell and both players did not win
+--   not any (==Nothing) miniBoard
+--     && not (didIWin (squaresFor Cross miniBoard) && didIWin (squaresFor Circle min a a))
+-- cannotWinMiniBoard p (Winner _) = False
 
 {-
 updateMatrix m x (r,c) =
@@ -75,11 +77,15 @@ updateMatrix m x (r,c) =
     drop (r + 1) m
 -}
 -- updating a miniboard and bigboard
-updateMatrix :: BigBoard -> Turn -> Location -> BigBoard
-updateMatrix m x (r,c) =
-  case splitAt r m of
-       (start, (Game cellsAtC):rest) -> start ++ [Game $ take (c-1) cellsAtC ++ [Just x] ++ drop (c + 1) cellsAtC]  ++ rest
-       _ -> error "invalid updateMatrix, should never happen."
+updateMatrix :: BigBoard -> Player -> Location -> BigBoard
+updateMatrix bb x (r,c) =
+  let (leftBoard,currentBoard:rightBoard) = splitAt r bb
+      (currentWinner, Game cellsAtC) = currentBoard
+      updatedCells = Game $ take (c-1) cellsAtC  ++ [Just x] ++ drop (c + 1) cellsAtC
+  in if miniWinner x updatedCells 
+        then leftBoard++[(Just x, updatedCells)]++rightBoard
+     else leftBoard++[(Nothing, updatedCells)]++rightBoard
+  
 
  --applies move to gamestate, uses anotherturn
 makeMove :: GameState -> Location -> Maybe GameState
@@ -94,22 +100,21 @@ anotherTurn Circle = Cross
 
 
 --applies index to cells to enumerate their locations
-getCellOfLocation :: Location -> GameState -> Either Cell Outcome
+getCellOfLocation :: Location -> GameState -> Maybe Cell
 getCellOfLocation (bigIndex, miniIndex) (_,bboard)
-  | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = error "IndexOutOfBound in getCellOfLocation"
-  | otherwise =
-      case bboard !! bigIndex of
-        Game cells -> Left $ cells !! miniIndex
-        Winner Nothing        -> Right Tie
-        Winner (Just player)  -> Right (Win player)
+  | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = Nothing -- error "IndexOutOfBound in getCellOfLocation"
+  | otherwise = let (states, miniboards) = unzip bboard 
+                    (Game thatMiniBoard) = (miniboards !! bigIndex) 
+                in Just $ thatMiniBoard !! miniIndex
 
 -- checks if cell is empty or not, returns true or false for legal moves
 checkCell :: Location -> GameState -> Bool
-checkCell location gs =
-  case getCellOfLocation location gs of
-          Right _            -> False
-          Left Nothing       -> True
-          Left (Just player) -> False
+checkCell location gas =
+  let thatCell = getCellOfLocation location gas
+  in case thatCell of 
+      Nothing            -> False
+      Just Nothing       -> True
+      Just (Just _)      -> False
 
  --use check cell to return list of possible legal moves
 getLegalMoves :: GameState -> [Location]
@@ -140,18 +145,19 @@ showTurn Circle = " o "
 showMiniBoard :: String -> MiniBoard -> String
 showMiniBoard sep (Game cells) =  intercalate sep $ map (intercalate "|") $ chunksOf 3 $ map showCell cells
   
-showMiniBoard sep (Winner Nothing) =
-  let cells = replicate 9 "Tie"
-  in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
-showMiniBoard sep (Winner cell) =
+-- showMiniBoard sep (Winner Nothing) =
+--   let cells = replicate 9 "Tie"
+--   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
+-- showMiniBoard sep (Winner cell) =
   
-  let cells = replicate 9 $ showCell cell
-  in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
+--   let cells = replicate 9 $ showCell cell
+--   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
 
 --should display the big board cells using miniboards
 showBigBoard :: BigBoard -> String 
-showBigBoard miniBoards =
-  let panels = chunksOf 3 miniBoards
+showBigBoard bigBoard =
+  let (winners,miniBoards) = unzip bigBoard
+      panels = chunksOf 3 miniBoards
       panelSeparator = '\n': replicate 37 '-' ++"\n"
   in intercalate panelSeparator (map printPanel panels) ++ "\n"
   where printPanel :: [MiniBoard] -> String
@@ -165,20 +171,20 @@ readGame str = undefined
 --insert a string with a turn and bigboard
 
 showGame :: GameState -> String       --Shows the file
-showGame = showGameState
+showGame = undefined -- showGameState "" 
 
 writeGame :: GameState -> FilePath -> IO () --writes game-state from file and converts to IO
 writeGame gameState path = writeFile path $ showGameState gameState ""
 
 loadGame :: FilePath -> IO GameState --
-loadGame = readFile 
+loadGame path = undefined -- let context <- readFile path in context
 
 ------
 putWinner :: GameState -> IO () --computes and prints winning move
 putWinner = undefined
 
 bestLocalMove :: GameState -> Location
-bestLocalMove (g:gs) =  
+bestLocalMove gas = undefined -- let moves = getLegalMoves 
 
 whoWillWin :: GameState -> Outcome
 whoWillWin = undefined
