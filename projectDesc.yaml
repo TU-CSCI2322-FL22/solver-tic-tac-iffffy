@@ -1,0 +1,6 @@
+srcFile : Game.hs
+exeFile : game
+
+builtIns: []
+
+borings: []
