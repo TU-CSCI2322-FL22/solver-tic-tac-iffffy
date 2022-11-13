@@ -2,7 +2,7 @@ import Data.List
 import Data.List.Split
 import Data.Maybe
 import Debug.Trace
-import TysPrim (threadIdPrimTyCon)
+--import TysPrim (threadIdPrimTyCon)
 
 main :: IO ()
 main = return ()
