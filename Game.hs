@@ -169,7 +169,7 @@ showBigBoard bigBoard =
                       ----- Milestone 2 -----
 --simple interface--
 readGame :: String -> GameState       --Reads the game state from file
-{-
+
 readGame str
   | str == "Cross;_" = (Cross,[])
   | str == "Circle;_" = (Circle,[])
@@ -177,11 +177,11 @@ readGame str
     let stuff = head (splitOn ";" str)
         newstuff = tail (splitOn ";" str)
     in (stuff,newstuff)
--}
+
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
 --pseudocode:
-readGame = undefined
+
 
 
 showGame :: GameState -> String       --Shows the file
