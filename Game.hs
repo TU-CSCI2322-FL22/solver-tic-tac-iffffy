@@ -193,6 +193,13 @@ writeGame gameState path = writeFile path $ showGameState gameState ""
 loadGame :: FilePath -> IO GameState --
 --loadGame path = loadGame writeGame >>= print 
 loadGame path = undefined
+
+
+
+
+
+
+
 ------
 putWinner :: GameState -> IO () --computes and prints winning move
 putWinner = undefined
