@@ -171,8 +171,8 @@ showBigBoard bigBoard =
 readGame :: String -> GameState       --Reads the game state from file
 
 readGame str
-  | str == "Cross;_" = (Cross,[])
-  | str == "Circle;_" = (Circle,[])
+  | str == "Cross\n_" = (Cross,[])
+  | str == "Circle\n_" = (Circle,[])
   | otherwise = 
     let stuff = head (splitOn ";" str)
         newstuff = tail (splitOn ";" str)
