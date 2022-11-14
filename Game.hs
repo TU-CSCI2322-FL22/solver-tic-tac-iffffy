@@ -169,15 +169,23 @@ showBigBoard bigBoard =
                       ----- Milestone 2 -----
 --simple interface--
 readGame :: String -> GameState       --Reads the game state from file
+--1) turn 2) BB
+--1) turn 2) maybe player 3)minib
+--1) Player [2)maybe Player 3)maybe player (list of cells)]
+{-
+  Sample string:
+  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])]
+-}
 
 readGame str
   | str == "Cross\n_" = (Cross,[])
   | str == "Circle\n_" = (Circle,[])
   | otherwise = 
-    let stuff = head (splitOn ";" str)
-        newstuff = tail (splitOn ";" str)
-    in (stuff,newstuff)
+    let maybeP = head (splitOn ";" str)
+        miniB = tail (splitOn ";" str)
+    in (maybeP,miniB)
 
+--ideas: use lines to separate 
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
 --pseudocode:
