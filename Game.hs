@@ -185,7 +185,7 @@ readGame str
         miniB = tail (splitOn ";" str)
     in (maybeP,miniB)
 
---ideas: use lines to separate 
+--ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
 --pseudocode:
