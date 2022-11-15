@@ -45,14 +45,7 @@ crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 --putStrLn (showGameState noneBoard " ")    
     
 main = do
-        describe "Winner of game" $ do -- WINNER TESTING
-                it "cross board" $ do
-                    gameStateWinner crossBoard `shouldBe` Just (Win Cross)
-    {-
-    if (gameStateWinner crossBoard) == Just (Win Cross) then putStrLn "Cross Won"
-    else if (gameStateWinner crossBoard) == Just (Win Circle) then putStrLn "Circle Won"
-    else putStrLn (showOutcome(gameStateWinner crossBoard))
-    if (gameStateWinner circleBoard) == Just (Win Cross) then putStrLn "Cross Won"
-    else if (gameStateWinner circleBoard) == Just (Win Circle) then putStrLn "Circle Won"
-    else putStrLn (showOutcome(gameStateWinner circleBoard))
-    -}
+        putStrLn (showGameState circleBoard " ") 
+        if (gameStateWinner circleBoard) == Just (Win Cross) then putStrLn "Cross Won"
+        else if (gameStateWinner circleBoard) == Just (Win Circle) then putStrLn "Circle Won"
+        else putStrLn (showOutcome(gameStateWinner circleBoard))
