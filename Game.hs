@@ -191,27 +191,20 @@ reading str
   | str == "Circle" = Circle
   | otherwise = Nothing
 
-=======
-readGame str = undefined
-{-
->>>>>>> Stashed changes
 readGame str
   | str == "Cross\n_" = (Cross,[])
   | str == "Circle\n_" = (Circle,[])
   | otherwise = 
-<<<<<<< Updated upstream
     let originGas = lines str
         --head (splitOn ";" str)
         roughturn = reading (head originGas)
         miniB = reading (tail (splitOn ";" originGas))
     in (turn,miniB)
 
-=======
     let maybeP = head (splitOn ";" str)
         miniB = tail (splitOn ";" str)
     in (maybeP,miniB)
--}
->>>>>>> Stashed changes
+
 --ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
@@ -228,10 +221,6 @@ writeGame gameState path = writeFile path $ showGameState gameState ""
 loadGame :: FilePath -> IO GameState --
 --loadGame path = loadGame writeGame >>= print 
 loadGame path = undefined
-
-
-
-
 
 
 
