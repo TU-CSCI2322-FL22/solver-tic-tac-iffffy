@@ -165,10 +165,56 @@ showBigBoard bigBoard =
           intercalate "\n" $ map (intercalate "||") $ transpose $ map ((splitOn "\n") . (showMiniBoard "\n")) panel
 ----------------
                       ----- Milestone 2 -----
+
+        
+--simple interface--
 --simple interface--
 readGame :: String -> GameState       --Reads the game state from file
-readGame str = undefined
---insert a string with a turn and bigboard
+--1) turn 2) BB
+--1) turn 2) maybe player 3)minib
+--1) Player [2)maybe Player 3)maybe player (list of cells)]
+{-
+  Sample string:
+  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])] (which would look like)
+
+  Cross
+  (Maybe Cross,[Circle,Cross,Circle,Cross])
+-}
+
+reading :: String -> Maybe Player
+reading str
+  | str == "Cross" = Just Cross
+  | str == "Circle" = Just Circle
+  | otherwise = Nothing
+
+
+readGame str
+  | str == "Cross\n_" = (Cross,[])
+  | str == "Circle\n_" = (Circle,[])
+  | otherwise = 
+    let originGas = str
+    
+      {-
+        Just Cross\nMiniBoard
+        "Turn\n"
+      -}
+        --head (splitOn ";" str)
+        roughturn = reading (head [originGas])
+        miniB = reading [tail (splitOn ";" originGas)]
+    in (turn,miniB)
+
+    -- let maybeP = head (splitOn ";" str)
+    --     miniB = tail (splitOn ";" str)
+    -- in (maybeP,miniB)
+newtype Att = Turn Player
+
+readHelp :: String -> Maybe GameState
+readHelp "cross"  = Turn Cross
+readHelp "circle" = Turn Circle
+  --case take 1 $ splitOn ";" str of
+   -- (Turn, [Game [Cell]]) -> do
+   --   t <- readPlayer turn
+      
 
 showGame :: GameState -> String       --Shows the file
 showGame = undefined -- showGameState "" 
