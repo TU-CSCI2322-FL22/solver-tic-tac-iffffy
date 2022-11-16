@@ -123,30 +123,30 @@ xLikelyWin2Step = (Cross, [(Just Cross, Game [Just Cross, Nothing, Nothing,
 tieBoard = (Cross, [(Just Cross, Game [Just Cross, Nothing, Nothing,
                                      Nothing, Just Cross, Nothing,
                                      Just Cross, Just Circle, Just Cross]),
-                     (Just Cross, Game [Just Cross, Just Cross, Just Cross,
+                     (Just Cross, Game [Just Cross, Just Cross, Just Circle,
                                      Just Circle, Just Cross, Just Circle,
-                                     Nothing, Just Cross, Just Circle]), 
-                     (Just Circle, Game [Just Circle, Just Cross, Nothing,
+                                     Nothing, Nothing, Just Circle]), 
+                     (Nothing, Game [Just Circle, Just Cross, Just Cross,
                                      Just Cross, Just Circle, Just Circle,
                                      Just Cross, Just Cross, Just Circle]),
                      (Just Cross, Game [Just Cross, Just Cross, Nothing,
                                      Just Circle, Just Cross, Just Circle,
-                                     Nothing, Just Cross, Just Circle]),
-                     (Just Cross, Game [Just Cross, Just Cross, Just Cross,
-                                     Just Circle, Just Cross, Just Circle,
                                      Nothing, Just Cross, Just Cross]),
-                     (Just Circle, Game [Just Cross, Just Cross, Just Cross,
+                     (Just Cross, Game [Just Circle, Just Cross, Just Cross,
+                                     Just Circle, Just Circle, Just Circle,
+                                     Nothing, Just Cross, Just Circle]),
+                     (Just Circle, Game [Just Cross, Just Cross, Just Circle,
                                      Just Cross, Just Cross, Just Circle,
                                      Just Circle, Just Circle, Just Circle]),
                      (Just Circle, Game [Just Cross, Just Cross, Just Circle,
                                      Just Cross, Just Cross, Just Circle,
                                      Nothing, Nothing, Just Circle]),
                      (Nothing, Game [Just Cross, Just Cross, Just Circle,
-                                     Nothing, Nothing, Nothing,
+                                     Just Cross, Nothing, Nothing,
                                      Just Cross, Just Cross, Just Circle]),
                      (Just Cross, Game [Just Cross, Just Cross, Just Circle,
                                      Just Cross, Just Cross, Just Circle,
-                                     Nothing, Nothing, Nothing])])
+                                     Nothing, Nothing, Just Cross])])
 
 noneBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 Nothing)))
 circleBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Circle))))
@@ -158,7 +158,9 @@ crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 --putStrLn (showGameState oLikelyWin1Step " ")
 --putStrLn (showGameState xLikelyWin2Step " ") 
 main :: IO()    
-main = hspec $ do
+main = do putStrLn (show $ bestMove oLikelyWin1Step)
+    {-
+    hspec $ do
         describe "Checking Winners" $ do
             it "board of circles" $ do
                 gameStateWinner circleBoard `shouldBe` Just (Win Circle)
@@ -166,6 +168,8 @@ main = hspec $ do
                 gameStateWinner crossBoard `shouldBe` Just (Win Cross)
             it "board of mixed X Winner" $ do
                 gameStateWinner xWinBoard `shouldBe` Just (Win Cross)
+            it "bestMove" $ do
+                bestMove oLikelyWin1Step  `shouldBe` (1,9)
             {-
             it "board of mixed O Winner" $ do
                 gameStateWinner oWinBoard `shouldBe` Just (Win Circle)
@@ -183,4 +187,5 @@ main = hspec $ do
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` xWinBoard
             it "readboard O" $ do
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` oWinBoard
-            -}
+        -}
+    -}

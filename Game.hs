@@ -173,7 +173,7 @@ showBigBoard bigBoard =
 ----------------
                       ----- Milestone 2 -----
 --simple interface--
-readGame :: String -> GameState       --Reads the game state from file
+--readGame :: String -> GameState       --Reads the game state from file
 --1) turn 2) BB
 --1) turn 2) maybe player 3)minib
 --1) Player [2)maybe Player 3)maybe player (list of cells)]
@@ -184,7 +184,7 @@ readGame :: String -> GameState       --Reads the game state from file
   Cross
   (Maybe Cross,[Circle,Cross,Circle,Cross])
 -}
-
+{-
 reading :: String -> Maybe Player
 reading str
   | str == "Cross" = Cross
@@ -204,7 +204,7 @@ readGame str
     let maybeP = head (splitOn ";" str)
         miniB = tail (splitOn ";" str)
     in (maybeP,miniB)
-
+-}
 --ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
@@ -271,7 +271,7 @@ goodSecondPlaces enemyIndices myIndices =
             [] -> possibleWins
             x -> x
       good = filter (`elem` remaining) $ map fst (last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins)
-  in good ++ filter (`notElem` good) remaining
+  in traceShow (good,remaining) $ good ++ filter (`notElem` good) remaining
 
 
 --call gamestatewinner after we make a move in order to double check
