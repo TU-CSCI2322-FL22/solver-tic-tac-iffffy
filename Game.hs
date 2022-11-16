@@ -174,16 +174,26 @@ readGame :: String -> GameState       --Reads the game state from file
 --1) Player [2)maybe Player 3)maybe player (list of cells)]
 {-
   Sample string:
-  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])]
+  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])] (which would look like)
+
+  Cross
+  (Maybe Cross,[Circle,Cross,Circle,Cross])
 -}
+reading :: String -> Maybe Player
+reading str
+  | str == "Cross" = Cross
+  | str == "Circle" = Circle
+  | otherwise = Nothing
 
 readGame str
   | str == "Cross\n_" = (Cross,[])
   | str == "Circle\n_" = (Circle,[])
   | otherwise = 
-    let maybeP = head (splitOn ";" str)
-        miniB = tail (splitOn ";" str)
-    in (maybeP,miniB)
+    let originGas = lines str
+        --head (splitOn ";" str)
+        roughturn = reading (head originGas)
+        miniB = reading (tail (splitOn ";" originGas))
+    in (turn,miniB)
 
 --ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
