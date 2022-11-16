@@ -148,7 +148,7 @@ tieBoard = (Cross, createBigBoard [Game [Just Cross, Just Cross, Just Circle,
                                      Just Circle, Nothing, Nothing,
                                      Just Cross, Just Cross, Just Circle]])
 
-emptyBoard = replicate 9 (Game $ replicate 9 Nothing)
+emptyBoard = (Circle, createBigBoard (replicate 9 (Game $ replicate 9 Nothing)))
 noneBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 Nothing)))
 circleBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Circle))))
 crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
@@ -163,10 +163,7 @@ crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 --putStrLn (show $ fst $ unzip $ snd xLikelyWin2Step)
 
 main :: IO()    
-main = do
-        putStrLn (showGameState xLikelyWin2Step " ")   
-        putStrLn (show $ fst $ unzip $ snd xLikelyWin2Step) 
-    {-
+main =
     hspec $ do
         describe "Checking Winners" $ do
             it "board of circles" $ do
@@ -178,13 +175,15 @@ main = do
             it "Tie Board Winner" $ do
                 gameStateWinner tieBoard `shouldBe` Tie
             it "bestMove" $ do
-                bestMove oLikelyWin1Step `shouldBe` (0,8)
+                bestMove oLikelyWin1Step `shouldBe` Just (0,8)
             it "bestMove 2X" $ do
-                bestMove xLikelyWin2Step `shouldBe` (0,8)
+                bestMove xLikelyWin2Step `shouldBe` Just (0,8)
             it "who will win o 1 step" $ do
                 whoWillWin oLikelyWin1Step `shouldBe` Win Circle
             it "who will win x 2 steps" $ do
                 whoWillWin xLikelyWin2Step `shouldBe` Win Cross
+            it "who will win empty board" $ do
+                whoWillWin emptyBoard `shouldBe` Tie
             {-
             it "board of mixed O Winner" $ do
                 gameStateWinner oWinBoard `shouldBe` Just (Win Circle)
@@ -203,4 +202,3 @@ main = do
             it "readboard O" $ do
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` oWinBoard
         -}
-    -}

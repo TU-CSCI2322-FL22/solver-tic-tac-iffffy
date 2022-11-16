@@ -132,8 +132,8 @@ getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 
           --- FOR VISUALIZATIONS ---
 
-emptyBoard = replicate 9 (Game $ replicate 9 Nothing)
-allXBoard = replicate 9 (Game $ replicate 9 (Just Cross))
+-- emptyBoard = replicate 9 (Game $ replicate 9 Nothing)
+-- allXBoard = replicate 9 (Game $ replicate 9 (Just Cross))
 
 --BigBoard, user interface showing
 showGameState :: GameState -> String -> String
@@ -243,28 +243,28 @@ whoWillWin gas =
         aux gas iter = 
           case gameStateWinner gas of 
             Win x -> gas
-            Tie   -> let moves = getLegalMoves gas
-                     in if moves == [] then gas
-                        else case makeMove gas (bestMove gas) of
+            Tie   -> let move = bestMove gas
+                     in if move == Nothing then gas
+                        else case makeMove gas (fromJust move) of
                                 Nothing -> error "Serious error, bestMove generated illegal move"
-                                Just x  -> aux gas (iter-1)
+                                Just x  -> aux x (iter-1)
                     
 
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
                     -- if equals?
                     -- if both == 0?
 
-bestMove :: GameState -> Location
+bestMove :: GameState -> Maybe Location
 bestMove (turn, bigBoard)=
   let enemy = anotherTurn turn
       (iDontWin,iWin) = critical (turn,bigBoard)
   in case iWin of
-    x:xs  -> x
+    x:xs  -> Just x
     [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
           in case enemyWin of
-            [x]   -> x
-            x:xs  -> x -- can I surrender :) enemy has more than 1 way to win bigBoard
-            []    -> head iDontWin
+            [x]   -> Just x
+            x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
+            []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
 
 -- First check critical for me to see if I can win the whole game by 1 step
 -- if I cannot win now, then
