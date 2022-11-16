@@ -66,13 +66,73 @@ oWinBoard = (Cross, [(Just Circle, Game [Just Circle, Nothing, Nothing,
                                      Just Cross, Just Circle, Just Circle,
                                      Nothing, Nothing, Just Circle])])
 
+compBoard = (Cross, [(Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle,
+                                     Just Cross, Just Circle, Just Cross]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]), 
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle])])
+
+compBoard = (Cross, [(Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle,
+                                     Just Cross, Just Circle, Just Cross]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]), 
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Cross,
+                                     Just Circle, Just Cross, Just Circle,
+                                     Nothing, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle]),
+                     (Cross, Game [Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle,
+                                     Just Cross, Just Cross, Just Circle])])
+
 noneBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 Nothing)))
 circleBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Circle))))
 crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 --putStrLn (showGameState compBoard " ")
+<<<<<<< Updated upstream
 --putStrLn (showGameState noneBoard " ")  
 --putStrLn (showGameState xWinBoard " ")    
 
+=======
+--putStrLn (showGameState noneBoard " ")    
+>>>>>>> Stashed changes
 main :: IO()    
 main = hspec $ do
         describe "Checking Winners" $ do -- SHOW FUNCTION TESTING
@@ -80,7 +140,11 @@ main = hspec $ do
                 gameStateWinner circleBoard `shouldBe` Just (Win Circle)
             it "board of crosses" $ do
                 gameStateWinner crossBoard `shouldBe` Just (Win Cross)
+<<<<<<< Updated upstream
             it "board of mixed X Winner" $ do
                 gameStateWinner xWinBoard `shouldBe` Just (Win Cross)
             it "board of mixed O Winner" $ do
                 gameStateWinner oWinBoard `shouldBe` Just (Win Circle)
+=======
+        
+>>>>>>> Stashed changes
