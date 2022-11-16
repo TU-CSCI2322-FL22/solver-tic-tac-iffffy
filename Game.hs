@@ -22,6 +22,8 @@ type GameState = (Turn, BigBoard)
 data Outcome = Win Player | Tie deriving (Show, Eq)
 type Location = (BigBoardIndex, MiniBoardIndex)
 
+
+{-
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
@@ -277,3 +279,4 @@ bestMove (turn, bigBoard)=
 -- checks the best second location for player on miniboard assuming there are no good first locations
 bestSndLocation locs player mb = let sqs = squaresFor player mb
                                  in [[[loc | sq <- sqs, sq `elem` win] | win <- possibleWins, loc `elem` win] | loc <- locs]
+-}

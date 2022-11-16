@@ -1,5 +1,10 @@
 module Solver where 
 import Game 
+import Data.List
+import Data.List.Split
+import Data.Maybe
+import Debug.Trace
+import Data.Foldable
 
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
@@ -156,27 +161,36 @@ goodSecondPlaces enemyIndices myIndices =
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
-whoWillWin = undefined
-  where aux :: GameState -> Int -> gameState
+whoWillWin gas = 
+  let final_gas = aux gas 81
+  in traceShow (fst $ unzip $ snd final_gas) $ gameStateWinner final_gas
+
+  where aux :: GameState -> Int -> GameState
         aux gas 0 = gas
-        aux (turn,bb) iter = 
-          cas
+        aux gas iter = 
+          case gameStateWinner gas of 
+            Win x -> gas
+            Tie   -> let move = bestMove gas
+                     in if move == Nothing then gas
+                        else case makeMove gas (fromJust move) of
+                                Nothing -> error "Serious error, bestMove generated illegal move"
+                                Just x  -> aux x (iter-1)
 
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
                     -- if equals?
                     -- if both == 0?
 
-bestMove :: GameState -> Location
+bestMove :: GameState -> Maybe Location
 bestMove (turn, bigBoard)=
   let enemy = anotherTurn turn
       (iDontWin,iWin) = critical (turn,bigBoard)
   in case iWin of
-    x:xs  -> x
+    x:xs  -> Just x
     [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
           in case enemyWin of
-            [x]   -> x
-            x:xs  -> x -- can I surrender :) enemy has more than 1 way to win bigBoard
-            []    -> head iDontWin
+            [x]   -> Just x
+            x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
+            []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
 
 -- First check critical for me to see if I can win the whole game by 1 step
 -- if I cannot win now, then

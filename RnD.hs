@@ -1,9 +1,14 @@
 module RnD where
 import Game
-
+import Data.List
+import Data.List.Split
+import Data.Maybe
+import Debug.Trace
+import Data.Foldable
+{-
                       ----- Milestone 2 -----
 --simple interface--
---readGame :: String -> GameState       --Reads the game state from file
+readGame :: String -> GameState       --Reads the game state from file
 --1) turn 2) BB
 --1) turn 2) maybe player 3)minib
 --1) Player [2)maybe Player 3)maybe player (list of cells)]
@@ -14,7 +19,7 @@ import Game
   Cross
   (Maybe Cross,[Circle,Cross,Circle,Cross])
 -}
-{-
+
 reading :: String -> Maybe Player
 reading str
   | str == "Cross" = Cross
@@ -60,7 +65,7 @@ readGame str = Just (columnHelp (tail mkeStrLst))     --Pattern match at some po
 readFile :: String -> Maybe GameState
 readFile str = sequence [readGame x | x <- tail(lines str)] 
 ----- read game code finish-----------
--}
+
           
 showGame :: GameState -> String       --Shows the file
 showGame = undefined
@@ -77,4 +82,4 @@ loadGame path = undefined
 ------
 putWinner :: GameState -> IO () --computes and prints winning move
 putWinner = undefined
-
+-}

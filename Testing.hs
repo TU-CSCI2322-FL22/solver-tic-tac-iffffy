@@ -1,4 +1,6 @@
 module Testing where
+import Solver
+import RnD
 import Test.QuickCheck
 import Game
 import Test.Hspec
