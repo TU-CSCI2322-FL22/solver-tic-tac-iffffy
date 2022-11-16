@@ -19,7 +19,7 @@ type Turn = Player
 type BigBoardIndex = Int
 type MiniBoardIndex = Int
 type GameState = (Turn, BigBoard)
-data Outcome = Win Player | Tie deriving (Eq)
+data Outcome = Win Player | Tie deriving (Show, Eq)
 type Location = (BigBoardIndex, MiniBoardIndex)
 
 -- list of possible moves for win
@@ -143,6 +143,11 @@ showTurn :: Turn -> String
 showTurn Cross = " x "
 showTurn Circle = " o "
 
+showOutcome :: Maybe Outcome -> String
+showOutcome (Just (Win Cross)) = " x "
+showOutcome (Just (Win Circle)) = " o "
+showOutcome (Just (Tie)) = " Tie "
+
 --show show miniboard interface
 showMiniBoard :: String -> MiniBoard -> String
 showMiniBoard sep (Game cells) =  intercalate sep $ map (intercalate "|") $ chunksOf 3 $ map showCell cells
@@ -179,6 +184,7 @@ readGame :: String -> GameState       --Reads the game state from file
   Cross
   (Maybe Cross,[Circle,Cross,Circle,Cross])
 -}
+
 reading :: String -> Maybe Player
 reading str
   | str == "Cross" = Cross
