@@ -1,26 +1,5 @@
-module Game where
-import Data.List
-import Data.List.Split
-import Data.Maybe
-import Debug.Trace
-import Data.Foldable
---import TysPrim (threadIdPrimTyCon)                      --WE IMPORTED IT BUT THEY'RE GIVING ERRORS FOR SOME REASON
---import GhcPlugins (boxingDataCon_maybe, xFlags)         --ALSO, I DON'T KNOW WHY WE HAVE THESE TWO IMPORTS
-main :: IO ()
-main = return ()
-
-data Player = Cross | Circle deriving (Show, Eq)
-type Cell = Maybe Player
-newtype MiniBoard = Game [Cell] deriving (Show, Eq) --Miniboard will be a bunch of cells
-type BigBoard = [(Maybe Player, MiniBoard)]         --Bigboard will be a list of tuples that remembers who wins in the Miniboard
-type Turn = Player
--- Cursor parking [ | M | J😩 | K 🥵| R | L | ]
--- Cursor cafe [🍊 🥐 🥗 🍰 🥪]
-type BigBoardIndex = Int
-type MiniBoardIndex = Int
-type GameState = (Turn, BigBoard)
-data Outcome = Win Player | Tie deriving (Show, Eq)
-type Location = (BigBoardIndex, MiniBoardIndex)
+module Solver where 
+import Game 
 
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
@@ -130,63 +109,6 @@ checkCell location gas =
 getLegalMoves :: GameState -> [Location]
 getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 
-          --- FOR VISUALIZATIONS ---
-
-emptyBoard = replicate 9 (Game $ replicate 9 Nothing)
-allXBoard = replicate 9 (Game $ replicate 9 (Just Cross))
-
---BigBoard, user interface showing
-showGameState :: GameState -> String -> String
-showGameState (turn, bboard) message =
-  unlines ["Current turn: " ++ show turn, "", showBigBoard bboard, "", message, ""]
-
- --cell char show
-showCell :: Cell -> String
-showCell Nothing = "   "
-showCell (Just Cross) = " x "
-showCell (Just Circle) = " o "
-
---- ugly cells :(( need for read functions
-uglyCell :: Cell -> String 
-uglyCell Nothing = " "
-uglyCell (Just Cross) = "x"
-uglyCell (Just Circle) = "o"
-
---uglyBoard :: BigBoard -> String
---uglyBoard bigBoard = chunksOf 3 uglyCell
---turn char show
-showTurn :: Turn -> String
-showTurn Cross = " x "
-showTurn Circle = " o "
-
-showOutcome :: Maybe Outcome -> String
-showOutcome (Just (Win Cross)) = " x "
-showOutcome (Just (Win Circle)) = " o "
-showOutcome (Just (Tie)) = " Tie "
-
---show show miniboard interface
-showMiniBoard :: String -> MiniBoard -> String
-showMiniBoard sep (Game cells) =  intercalate sep $ map (intercalate "|") $ chunksOf 3 $ map showCell cells
-
--- showMiniBoard sep (Winner Nothing) =
---   let cells = replicate 9 "Tie"
---   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
--- showMiniBoard sep (Winner cell) =
-
---   let cells = replicate 9 $ showCell cell
---   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
-
---should display the big board cells using miniboards
-showBigBoard :: BigBoard -> String
-showBigBoard bigBoard =
-  let (winners,miniBoards) = unzip bigBoard
-      panels = chunksOf 3 miniBoards
-      panelSeparator = '\n': replicate 37 '-' ++"\n"
-  in intercalate panelSeparator (map printPanel panels) ++ "\n"
-  where printPanel :: [MiniBoard] -> String
-        printPanel panel =
-          intercalate "\n" $ map (intercalate "||") $ transpose $ map (splitOn "\n" . showMiniBoard "\n") panel
-----------------
 --split whoWillWin into helper functions: critical and gain win
 --the problem is being split like this because we need to check two conditions:
 --1: the current sign (circle or cross) needs to block their opponent from winning on their next turn
@@ -234,21 +156,11 @@ goodSecondPlaces enemyIndices myIndices =
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
-whoWillWin gas = 
-  let final_gas = aux gas 81
-  in traceShow (fst $ unzip $ snd final_gas) $ gameStateWinner final_gas
-
-  where aux :: GameState -> Int -> GameState
+whoWillWin = undefined
+  where aux :: GameState -> Int -> gameState
         aux gas 0 = gas
-        aux gas iter = 
-          case gameStateWinner gas of 
-            Win x -> gas
-            Tie   -> let moves = getLegalMoves gas
-                     in if moves == [] then gas
-                        else case makeMove gas (bestMove gas) of
-                                Nothing -> error "Serious error, bestMove generated illegal move"
-                                Just x  -> aux gas (iter-1)
-                    
+        aux (turn,bb) iter = 
+          cas
 
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
                     -- if equals?
