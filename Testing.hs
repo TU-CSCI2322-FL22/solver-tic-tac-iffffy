@@ -158,9 +158,7 @@ crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 --putStrLn (showGameState oLikelyWin1Step " ")
 --putStrLn (showGameState xLikelyWin2Step " ") 
 main :: IO()    
-main = do putStrLn (showGameState xLikelyWin2Step " ") 
-    {-
-    hspec $ do
+main = hspec $ do
         describe "Checking Winners" $ do
             it "board of circles" $ do
                 gameStateWinner circleBoard `shouldBe` Just (Win Circle)
@@ -168,10 +166,14 @@ main = do putStrLn (showGameState xLikelyWin2Step " ")
                 gameStateWinner crossBoard `shouldBe` Just (Win Cross)
             it "board of mixed X Winner" $ do
                 gameStateWinner xWinBoard `shouldBe` Just (Win Cross)
+            {-
             it "board of mixed O Winner" $ do
                 gameStateWinner oWinBoard `shouldBe` Just (Win Circle)
             it "board of mixed O Winner" $ do
                 gameStateWinner oWinBoard `shouldBe` Just (Win Circle)
+            it "board of mixed O Winner" $ do
+                gameStateWinner tieBoard `shouldBe` Just Tie
+            
             it "who will win o 1 step" $ do
                 whoWillWin oLikelyWin1Step `shouldBe` Just (Win Circle)
             it "who will win x 2 steps" $ do
@@ -181,4 +183,4 @@ main = do putStrLn (showGameState xLikelyWin2Step " ")
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` xWinBoard
             it "readboard O" $ do
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` oWinBoard
-    -}
+            -}
