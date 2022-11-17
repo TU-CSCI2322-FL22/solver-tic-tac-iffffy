@@ -180,28 +180,35 @@ readGame :: String -> GameState       --Reads the game state from file
   Cross
   (Maybe Cross,[Circle,Cross,Circle,Cross])
 -}
-
-reading :: String -> Maybe Player
-reading str
+readingBB :: String -> Maybe Player
+readingBB str
   | str == "Cross" = Just Cross
   | str == "Circle" = Just Circle
-  | otherwise = Nothing
+  | str == "_" = Nothing
+  | otherwise = error "what the"
+
+reading :: String -> Player
+reading str
+  | str == "Cross" = Cross
+  | str == "Circle" = Circle
+  | otherwise = error "Nothing"
 
 
 readGame str
   | str == "Cross\n_" = (Cross,[])
   | str == "Circle\n_" = (Circle,[])
   | otherwise = 
-    let originGas = str
+    let originGas = lines str
     
       {-
         Just Cross\nMiniBoard
         "Turn\n"
       -}
         --head (splitOn ";" str)
-        roughturn = reading (head [originGas])
-        miniB = reading [tail (splitOn ";" originGas)]
-    in (turn,miniB)
+        turn = reading (head originGas)
+        bigB = tail originGas
+        --maybe use x:xs and a list comprehension to pattern match each maybe player to cross, circle or nothing
+    in (turn,bigB)
 
     -- let maybeP = head (splitOn ";" str)
     --     miniB = tail (splitOn ";" str)
