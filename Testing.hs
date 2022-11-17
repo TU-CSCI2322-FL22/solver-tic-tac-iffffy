@@ -163,9 +163,20 @@ crossBoard = (Circle, replicate 9 (Nothing, Game (replicate 9 (Just Cross))))
 
 --putStrLn (showGameState xLikelyWin2Step " ")   
 --putStrLn (show $ fst $ unzip $ snd xLikelyWin2Step)
-
+{-
+let field = readGame "xxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nxxxxxxxxx\no"
+    field1 = readGame "xx_xxx_ox\nxxx__oxxx\nooooooooo\nxxoox__xx\nx__xxxoxx\nxooxxx_xx\nxooxxxxxx\nxxxxxxxxx\nxxxxxxxxx\nx"
+    field2 = readGame "xxx_x__xx\nx_xxxx__x\n___xxxxxx\nxxx___xxx\nxxxxxx___\n_xxxxxxx_\nxxxxxxxxx\nxoxxxxxox\nxoxoxox__\no"
+in do 
+            putStrLn (showGameState field " ")
+            putStrLn (showGameState field1 " ")
+            putStrLn (showGameState field2 " ") 
+-}
 main :: IO()    
-main =
+main = do x <- loadGame "board.txt"
+          putStrLn (showGameState x "") 
+        
+    {-
     hspec $ do
         describe "Checking Winners" $ do
             it "board of circles" $ do
@@ -204,3 +215,4 @@ main =
             it "readboard O" $ do
                 readGame readGame "XXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nXXXXXXXXX\nO\n8" `shouldBe` oWinBoard
         -}
+    -}
