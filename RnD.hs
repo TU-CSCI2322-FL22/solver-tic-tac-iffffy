@@ -5,41 +5,25 @@ import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import Data.Foldable
-{-
-                      ----- Milestone 2 -----
---simple interface--
-readGame :: String -> GameState       --Reads the game state from file
---1) turn 2) BB
---1) turn 2) maybe player 3)minib
---1) Player [2)maybe Player 3)maybe player (list of cells)]
-{-
-  Sample string:
-  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])] (which would look like)
 
-  Cross
-  (Maybe Cross,[Circle,Cross,Circle,Cross])
--}
+readingBB :: Char -> Maybe Player
+readingBB str
+  | str == 'x' = Just Cross
+  | str == 'o' = Just Circle
+  | str == '_' = Nothing
+  | otherwise = error "what the"
 
-reading :: String -> Maybe Player
+reading :: String -> Turn
 reading str
-  | str == "Cross" = Cross
-  | str == "Circle" = Circle
-  | otherwise = Nothing
+  | str == "x" = Cross
+  | str == "o" = Circle
+  | otherwise = error "Nothing"
 
-readGame str
-  | str == "Cross\n_" = (Cross,[])
-  | str == "Circle\n_" = (Circle,[])
-  | otherwise = 
-    let originGas = lines str
-        --head (splitOn ";" str)
-        roughturn = reading (head originGas)
-        miniB = reading (tail (splitOn ";" originGas))
-    in (turn,miniB)
-
-    let maybeP = head (splitOn ";" str)
-        miniB = tail (splitOn ";" str)
-    in (maybeP,miniB)
--}
+readGame str = let lsplit = lines str
+                   lineBoards = take 9 lsplit
+                   player = last lsplit
+               in (reading player,createBigBoard [Game [readingBB char | char <- line] | line <- lineBoards])
+               
 --ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
