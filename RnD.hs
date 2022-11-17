@@ -18,33 +18,23 @@ reading str
   | str == "x" = Cross
   | str == "o" = Circle
   | otherwise = error "Nothing"
-
+  
+readGame :: String -> Game
 readGame str = let lsplit = lines str
                    lineBoards = take 9 lsplit
                    player = last lsplit
                in (reading player,createBigBoard [Game [readingBB char | char <- line] | line <- lineBoards])
-               
+
+loadGame :: FilePath -> IO GameState
+loadGame path = do text <- readFile path
+    return $ readGame text
+
 --ideas: use lines to separate the different parts of the game state
 --insert a string with a turn and bigboard
 --bigBoard is a list of miniboards, which is a list of cells
 --pseudocode:
 --------read game code start--------
 {-
-readPlayer :: String -> Maybe Player                        --Reads individual player data types
-readPlayer "x" = Cross
-readPlayer "o" = Circle
-readPlayer " " = Nothing
-
-readCell :: String -> Cell   --reads cell?
-readCell = undefined
-
-columnHelp :: [String] -> [Player]                    --Applies readPlayer to a column
-columnHelp [x] = [readPlayer x]
-columnHelp (x:xs) = (readPlayer x): (columnHelp (xs))
-
-readGame :: String -> Maybe [Player]                  --Applies columnHelp to the tail of a line
-readGame str = Just (columnHelp (tail mkeStrLst))     --Pattern match at some point (error) 
-    where mkeStrLst = splitOn ";" str
           
 readFile :: String -> Maybe GameState
 readFile str = sequence [readGame x | x <- tail(lines str)] 
