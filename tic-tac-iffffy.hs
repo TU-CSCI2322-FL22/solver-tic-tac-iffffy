@@ -207,17 +207,18 @@ readGame str
         --head (splitOn ";" str)
         turn = reading (head originGas)
         bigB = tail originGas
+        bigBtuples = map reading bigB
         --maybe use x:xs and a list comprehension to pattern match each maybe player to cross, circle or nothing
-    in (turn,bigB)
+    in (turn,bigBtuples)
 
     -- let maybeP = head (splitOn ";" str)
     --     miniB = tail (splitOn ";" str)
     -- in (maybeP,miniB)
 newtype Att = Turn Player
 
-readHelp :: String -> Maybe GameState
-readHelp "cross"  = Turn Cross
-readHelp "circle" = Turn Circle
+-- readHelp :: String -> Maybe GameState
+-- readHelp "cross"  = Turn Cross
+-- readHelp "circle" = Turn Circle
   --case take 1 $ splitOn ";" str of
    -- (Turn, [Game [Cell]]) -> do
    --   t <- readPlayer turn
