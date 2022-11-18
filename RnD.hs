@@ -101,32 +101,3 @@ showBigBoard bigBoard =
   where printPanel :: [MiniBoard] -> String
         printPanel panel =
           intercalate "\n" $ map (intercalate "||") $ transpose $ map ((splitOn "\n") . (showMiniBoard "\n")) panel
-
---ideas: use lines to separate the different parts of the game state
---insert a string with a turn and bigboard
---bigBoard is a list of miniboards, which is a list of cells
---pseudocode:
---------read game code start--------
-{-
-          
-readFile :: String -> Maybe GameState
-readFile str = sequence [readGame x | x <- tail(lines str)] 
------ read game code finish-----------
-
-          
-showGame :: GameState -> String       --Shows the file
-showGame = undefined
-
-writeGame :: GameState -> FilePath -> IO () --writes game-state from file and converts to IO
-writeGame gameState path = writeFile path $ showGameState gameState ""
-
-loadGame :: FilePath -> IO GameState --
---loadGame path = loadGame writeGame >>= print 
-loadGame path = undefined
-
-
-
-------
-putWinner :: GameState -> IO () --computes and prints winning move
-putWinner = undefined
--}
