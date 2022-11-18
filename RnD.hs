@@ -47,6 +47,9 @@ loadGame path = do
 showGame :: GameState -> String
 showGame (trn, bb) = (intercalate "\n" [concat [writeBB p | p <- mb] | (Game mb) <- snd $ unzip bb]) ++ "\n" ++ (writing trn)
 
+putWinner :: GameState -> IO ()
+putWinner gs = putStrLn(show (whoWillWin gs)) 
+
 writeGame::GameState -> FilePath -> IO()
 writeGame gas path = writeFile path $ showGame gas
 
@@ -70,6 +73,11 @@ showCell (Just Circle) = " o "
 showTurn :: Turn -> String 
 showTurn Cross = " x "
 showTurn Circle = " o "
+
+showOutcome :: Maybe Outcome -> String
+showOutcome (Just (Win Cross)) = " x "
+showOutcome (Just (Win Circle)) = " o "
+showOutcome (Just (Tie)) = " Tie "
 
 --show show miniboard interface
 showMiniBoard :: String -> MiniBoard -> String

@@ -175,6 +175,9 @@ in do
 main :: IO()    
 main = do x <- loadGame "board.txt"
           putStrLn (showGameState x "") 
+          putStrLn (showGame x)
+          putWinner xLikelyWin2Step
+          writeGame x "board2.txt"
         
     {-
     hspec $ do
