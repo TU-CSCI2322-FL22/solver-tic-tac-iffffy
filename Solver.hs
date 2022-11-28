@@ -156,14 +156,14 @@ goodSecondPlaces enemyIndices myIndices =
             [] -> possibleWins
             x -> x
       good = filter (`elem` remaining) $ map fst (last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins)
-  in traceShow (good,remaining) $ good ++ filter (`notElem` good) remaining
+  in good ++ filter (`notElem` good) remaining
 
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
 whoWillWin gas = 
   let final_gas = aux gas 81
-  in traceShow (fst $ unzip $ snd final_gas) $ gameStateWinner final_gas
+  in  gameStateWinner final_gas
 
   where aux :: GameState -> Int -> GameState
         aux gas 0 = gas
