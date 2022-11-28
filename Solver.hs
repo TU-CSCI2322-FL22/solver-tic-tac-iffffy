@@ -1,29 +1,11 @@
-module Game where
+module Solver where 
+import Game 
 import Data.List
 import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import Data.Foldable
---import TysPrim (threadIdPrimTyCon)                      --WE IMPORTED IT BUT THEY'RE GIVING ERRORS FOR SOME REASON
---import GhcPlugins (boxingDataCon_maybe, xFlags)         --ALSO, I DON'T KNOW WHY WE HAVE THESE TWO IMPORTS
-main :: IO ()
-main = return ()
 
-data Player = Cross | Circle deriving (Show, Eq)
-type Cell = Maybe Player
-newtype MiniBoard = Game [Cell] deriving (Show, Eq) --Miniboard will be a bunch of cells
-type BigBoard = [(Maybe Player, MiniBoard)]         --Bigboard will be a list of tuples that remembers who wins in the Miniboard
-type Turn = Player
--- Cursor parking [ | M | J😩 | K 🥵| R | L | ]
--- Cursor cafe [🍊 🥐 🥗 🍰 🥪]
-type BigBoardIndex = Int
-type MiniBoardIndex = Int
-type GameState = (Turn, BigBoard)
-data Outcome = Win Player | Tie deriving (Show, Eq)
-type Location = (BigBoardIndex, MiniBoardIndex)
-
-
-{-
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
@@ -132,121 +114,6 @@ checkCell location gas =
 getLegalMoves :: GameState -> [Location]
 getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 
-          --- FOR VISUALIZATIONS ---
-
--- emptyBoard = replicate 9 (Game $ replicate 9 Nothing)
--- allXBoard = replicate 9 (Game $ replicate 9 (Just Cross))
-
---BigBoard, user interface showing
-showGameState :: GameState -> String -> String
-showGameState (turn, bboard) message =
-  unlines ["Current turn: " ++ show turn, "", showBigBoard bboard, "", message, ""]
-
- --cell char show
-showCell :: Cell -> String
-showCell Nothing = "   "
-showCell (Just Cross) = " x "
-showCell (Just Circle) = " o "
-
---- ugly cells :(( need for read functions
-uglyCell :: Cell -> String 
-uglyCell Nothing = " "
-uglyCell (Just Cross) = "x"
-uglyCell (Just Circle) = "o"
-
---uglyBoard :: BigBoard -> String
---uglyBoard bigBoard = chunksOf 3 uglyCell
---turn char show
-showTurn :: Turn -> String
-showTurn Cross = " x "
-showTurn Circle = " o "
-
-showOutcome :: Maybe Outcome -> String
-showOutcome (Just (Win Cross)) = " x "
-showOutcome (Just (Win Circle)) = " o "
-showOutcome (Just (Tie)) = " Tie "
-
---show show miniboard interface
-showMiniBoard :: String -> MiniBoard -> String
-showMiniBoard sep (Game cells) =  intercalate sep $ map (intercalate "|") $ chunksOf 3 $ map showCell cells
-
--- showMiniBoard sep (Winner Nothing) =
---   let cells = replicate 9 "Tie"
---   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
--- showMiniBoard sep (Winner cell) =
-
---   let cells = replicate 9 $ showCell cell
---   in intercalate sep $ map (intercalate "|") $ chunksOf 3 cells
-
---should display the big board cells using miniboards
-showBigBoard :: BigBoard -> String
-showBigBoard bigBoard =
-  let (winners,miniBoards) = unzip bigBoard
-      panels = chunksOf 3 miniBoards
-      panelSeparator = '\n': replicate 37 '-' ++"\n"
-  in intercalate panelSeparator (map printPanel panels) ++ "\n"
-  where printPanel :: [MiniBoard] -> String
-        printPanel panel =
-          intercalate "\n" $ map (intercalate "||") $ transpose $ map (splitOn "\n" . showMiniBoard "\n") panel
-----------------
-                      ----- Milestone 2 -----
---simple interface--
-readGame :: String -> GameState       --Reads the game state from file
---1) turn 2) BB
---1) turn 2) maybe player 3)minib
---1) Player [2)maybe Player 3)maybe player (list of cells)]
-{-
-  Sample string:
-  Cross\n[(Maybe Cross,[Maybe Cross, Maybe Circle, Maybe Circle])] (which would look like)
-
-  Cross
-  (Maybe Cross,[Circle,Cross,Circle,Cross])
--}
-
-reading :: String -> Maybe Player
-reading str
-  | str == "Cross" = Cross
-  | str == "Circle" = Circle
-  | otherwise = Nothing
-
-readGame str
-  | str == "Cross\n_" = (Cross,[])
-  | str == "Circle\n_" = (Circle,[])
-  | otherwise = 
-    let originGas = lines str
-        --head (splitOn ";" str)
-        roughturn = reading (head originGas)
-        miniB = reading (tail (splitOn ";" originGas))
-    in (turn,miniB)
-
-    let maybeP = head (splitOn ";" str)
-        miniB = tail (splitOn ";" str)
-    in (maybeP,miniB)
-
---ideas: use lines to separate the different parts of the game state
---insert a string with a turn and bigboard
---bigBoard is a list of miniboards, which is a list of cells
---pseudocode:
-
-
-
-showGame :: GameState -> String       --Shows the file
-showGame = undefined
-
-writeGame :: GameState -> FilePath -> IO () --writes game-state from file and converts to IO
-writeGame gameState path = writeFile path $ showGameState gameState ""
-
-loadGame :: FilePath -> IO GameState --
---loadGame path = loadGame writeGame >>= print 
-loadGame path = undefined
-
-
-
-------
-putWinner :: GameState -> IO () --computes and prints winning move
-putWinner = undefined
-
-
 --split whoWillWin into helper functions: critical and gain win
 --the problem is being split like this because we need to check two conditions:
 --1: the current sign (circle or cross) needs to block their opponent from winning on their next turn
@@ -308,7 +175,6 @@ whoWillWin gas =
                         else case makeMove gas (fromJust move) of
                                 Nothing -> error "Serious error, bestMove generated illegal move"
                                 Just x  -> aux x (iter-1)
-                    
 
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
                     -- if equals?
@@ -337,4 +203,3 @@ bestMove (turn, bigBoard)=
 -- checks the best second location for player on miniboard assuming there are no good first locations
 bestSndLocation locs player mb = let sqs = squaresFor player mb
                                  in [[[loc | sq <- sqs, sq `elem` win] | win <- possibleWins, loc `elem` win] | loc <- locs]
--}
