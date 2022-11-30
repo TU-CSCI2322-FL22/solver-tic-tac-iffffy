@@ -15,6 +15,7 @@ import           System.Exit
 import Control.Monad (when)
 import Data.ByteString (hPutStr)
 
+
 defaultFile :: String
 defaultFile = "board.txt"
 
@@ -77,7 +78,7 @@ main = do
   when help (do printHelp; exitSuccess)
   when winner (printWinner fname)
   
-  when (move /= "") (printMakeMove fname) 
+  when (move /= "") (printMakeMove fname move) 
   when verbose (do printEvalMove searchDepth fname;)
   when interactive (startGame fname)
   
@@ -85,13 +86,36 @@ main = do
 
 printHelp :: IO ()
 printHelp = do
-  putStrLn "Here is HELP"
+  putStrLn $ intercalate  "\n"  [
+    "Here is HELP",
+    "-h | --help                  Print flag options",
+    "-w | --winner                Print best move with exhaustive search",
+    "-d | --depth       INT       Set depth level of search",
+    "-m | --move        STRING    Make move and print updated board",
+    "-v | --verbose               Print best move in depth and a description of how good it is",
+    "-i | --interactive           Start interactive game",
+    "-f | --file        STRING    Assign file name (default: ???)"
+    ]
 
 printWinner :: String -> IO ()
-printWinner fname = putStrLn "Here is Winner"
-
-printMakeMove :: String ->  IO ()
-printMakeMove fname = putStrLn "Here is Best Move"
+printWinner fname = do
+  putStrLn "Here is the outcome:"
+  game <- loadGame fname
+  putWinner game
+  
+printMakeMove :: String -> String ->  IO ()
+printMakeMove fname move = do
+  putStrLn "Here is the new board:"
+  game <- loadGame fname
+  let loc = (0,2)
+  putStr $ showGameState game " (before)"
+  putStr $ show $ head $ map snd (snd game)
+  case makeMove game loc of
+    Just x  -> do
+      putStr $ showGameState x $ "Your input move is " ++ show loc -- move
+      putStr $ show $ head $ map snd (snd x)
+    Nothing -> putStr $ showGameState game $ "Illegal move (" ++ move ++"). No move is made."
+  
 
 printEvalMove :: Int -> String -> IO ()
 printEvalMove depth fname = putStrLn "Here is Evaluation"
