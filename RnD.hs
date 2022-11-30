@@ -6,6 +6,7 @@ import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import Data.Foldable
+import System.Directory (doesFileExist)
 
 readingBB :: Char -> Maybe Player
 readingBB str
@@ -41,8 +42,14 @@ readGame str = let lsplit = lines str
 
 loadGame :: FilePath -> IO GameState
 loadGame path = do 
-  text <- readFile path
-  return (readGame text)
+  checkFile <- doesFileExist path
+  if checkFile then
+    do 
+      text <- readFile path
+      return (readGame text)
+  else 
+    do
+      error $ "Cannot find the File " ++ path
 
 showGame :: GameState -> String
 showGame (trn, bb) = (intercalate "\n" [concat [writeBB p | p <- mb] | (Game mb) <- snd $ unzip bb]) ++ "\n" ++ (writing trn)
