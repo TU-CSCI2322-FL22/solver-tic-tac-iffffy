@@ -126,7 +126,16 @@ printMakeMove fname move = do
   
 
 printEvalMove :: Int -> String -> IO ()
-printEvalMove depth fname = putStrLn "Here is Evaluation"
+printEvalMove depth fname = do
+  putStrLn "Here is Evaluation:"
+  game <- loadGame fname
+  let result = scoreGame game
+  case result of 
+    (Win x, _) -> putStrLn $ "Player" ++ show x ++ " is winning"
+    (Tie, 0 )   -> putStrLn "Tie!!!!!!"
+    (Tie, s )   -> 
+      if s > 0 then putStrLn $ "Player Cross is leading with score " ++ show s
+      else putStrLn $ "Player Circle is leading with score " ++ show (-s)
 
 startGame :: String -> IO ()
 startGame fname = 
