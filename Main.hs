@@ -16,6 +16,7 @@ import           System.Environment
 import           System.Exit
 
 import           Control.Monad (when)
+import System.Posix.Internals (puts)
 
 
 
@@ -104,9 +105,11 @@ printHelp = do
 
 printWinner :: String -> IO ()
 printWinner fname = do
-  putStrLn "Here is the outcome:"
   game <- loadGame fname
-  putWinner game
+  let bestLoc = bestMove game
+  case bestLoc of
+    Nothing -> putStrLn "No best move"
+    Just x  -> putStrLn $ "Here is the best move:" ++ show x
   
 printMakeMove :: String -> String ->  IO ()
 printMakeMove fname move = do
