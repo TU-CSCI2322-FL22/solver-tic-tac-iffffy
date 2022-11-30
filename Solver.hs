@@ -176,6 +176,24 @@ whoWillWin gas =
                                 Nothing -> error "Serious error, bestMove generated illegal move"
                                 Just x  -> aux x (iter-1)
 
+--call gamestatewinner after we make a move in order to double check
+cutOffWin :: GameState -> Int -> Outcome --Checks who's the closest to winning
+cutOffWin gas depth = 
+  let final_gas = aux gas depth depth
+  in  gameStateWinner final_gas
+
+  where aux :: GameState -> Int -> Int -> GameState
+        aux gas 0 depth = gas
+        aux gas iter depth = 
+          case gameStateWinner gas of 
+            Win x -> gas
+            Tie   -> let move = bestMove gas
+                    in if move == Nothing then gas
+                        else case makeMove gas (fromJust move) of
+                                Nothing -> error "Serious error, bestMove generated illegal move"
+                                Just x  -> aux x (iter-1)
+
+
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
                     -- if equals?
                     -- if both == 0?
