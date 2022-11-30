@@ -1,10 +1,10 @@
-xx_xxx_ox
+xx_xox_ox
 xxx__oxxx
 ooooooooo
-xxoox__xx
+xxooo__xx
 x__xxxoxx
 xooxxx_xx
 xooxxxxxx
-xxxxxxxxx
-xxxxxxxxx
+_________
+_________
 x

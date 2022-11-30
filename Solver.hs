@@ -135,6 +135,13 @@ critical gas =                      --for some reason gameState is now called "g
                                ) ([],[]) possibleMoves
   in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
 
+scoreGame :: GameState -> (Outcome,Int)
+scoreGame (t,bboard) = 
+  let crossScore  = length a + 10 * length b where (a,b) = critical (Cross, bboard) 
+      circleScore = length a + 10 * length b where (a,b) = critical (Circle, bboard) 
+  in (gameStateWinner (t,bboard), crossScore - circleScore)
+
+
 sortCriticalOfMiniBoards :: GameState -> [Location] -> [Location]
 -- sort the locations according to best places to build win (a.k.a second mark)
 sortCriticalOfMiniBoards _ [] = []
@@ -177,21 +184,21 @@ whoWillWin gas =
                                 Just x  -> aux x (iter-1)
 
 --call gamestatewinner after we make a move in order to double check
-cutOffWin :: GameState -> Int -> Outcome --Checks who's the closest to winning
-cutOffWin gas depth = 
-  let final_gas = aux gas depth depth
-  in  gameStateWinner final_gas
+-- cutOffWin :: GameState -> Int -> Outcome --Checks who's the closest to winning
+-- cutOffWin gas depth = 
+--   let final_gas = aux gas depth depth
+--   in  gameStateWinner final_gas
 
-  where aux :: GameState -> Int -> Int -> GameState
-        aux gas 0 depth = gas
-        aux gas iter depth = 
-          case gameStateWinner gas of 
-            Win x -> gas
-            Tie   -> let move = bestMove gas
-                    in if move == Nothing then gas
-                        else case makeMove gas (fromJust move) of
-                                Nothing -> error "Serious error, bestMove generated illegal move"
-                                Just x  -> aux x (iter-1)
+--   where aux :: GameState -> Int -> Int -> GameState
+--         aux gas 0 depth = gas
+--         aux gas iter depth = 
+--           case gameStateWinner gas of 
+--             Win x -> gas
+--             Tie   -> let move = bestMove gas
+--                     in if move == Nothing then gas
+--                         else case makeMove gas (fromJust move) of
+--                                 Nothing -> error "Serious error, bestMove generated illegal move"
+--                                 Just x  -> aux x (iter-1)
 
 
 -- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
