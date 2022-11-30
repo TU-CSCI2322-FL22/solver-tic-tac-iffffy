@@ -6,8 +6,8 @@ import Debug.Trace
 import Data.Foldable
 --import TysPrim (threadIdPrimTyCon)                      --WE IMPORTED IT BUT THEY'RE GIVING ERRORS FOR SOME REASON
 --import GhcPlugins (boxingDataCon_maybe, xFlags)         --ALSO, I DON'T KNOW WHY WE HAVE THESE TWO IMPORTS
-main :: IO ()
-main = return ()
+-- main :: IO ()
+-- main = return ()
 
 data Player = Cross | Circle deriving (Show, Eq)
 type Cell = Maybe Player

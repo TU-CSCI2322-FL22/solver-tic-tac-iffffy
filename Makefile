@@ -1,11 +1,11 @@
 # Commands:
 
-name := main
+name := theGame
 
 .PHONY: build init test clean doc deploy stage
 
 build: 
-	ghc --make -O -o $(name) tic-tac-iffffy.hs
+	ghc --make -O -o $(name) Main.hs
 
 prof:
 	ghc --make -prof -o $(name) Main.hs
