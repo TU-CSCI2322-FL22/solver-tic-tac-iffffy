@@ -1,9 +1,12 @@
 module Main where
 import           Data.List
+
+import           Data.List.Split (splitOn)
+
 import           Data.Char
 import           Data.Maybe
 import           Debug.Trace
-import           System.Random (mkStdGen, randomR) -- use "cabal install --lib random" if you don't have this package
+-- import           System.Random (mkStdGen, randomR) -- use "cabal install --lib random" if you don't have this package
 import           Game
 import           RnD
 import           Solver
@@ -12,8 +15,8 @@ import           System.Console.GetOpt
 import           System.Environment
 import           System.Exit
 
-import Control.Monad (when)
-import Data.ByteString (hPutStr)
+import           Control.Monad (when)
+
 
 
 defaultFile :: String
@@ -55,6 +58,9 @@ options = [
 
 main :: IO ()
 main = do
+  putStrLn "Welcome to Utimate tic-tac-toe"
+  putStrLn $ intercalate "\n\t" ["Authors: ","Matvei","Kenneth","Hose","Raven","Lucy"] 
+  putStrLn "------ Enjoy! ------"
   allArgs <- getArgs
   
   -- Parse options, getting a list of option actions
@@ -77,7 +83,6 @@ main = do
 
   when help (do printHelp; exitSuccess)
   when winner (printWinner fname)
-  
   when (move /= "") (printMakeMove fname move) 
   when verbose (do printEvalMove searchDepth fname;)
   when interactive (startGame fname)
@@ -91,7 +96,7 @@ printHelp = do
     "-h | --help                  Print flag options",
     "-w | --winner                Print best move with exhaustive search",
     "-d | --depth       INT       Set depth level of search",
-    "-m | --move        STRING    Make move and print updated board",
+    "-m | --move        Int,Int   Make move and print updated board",
     "-v | --verbose               Print best move in depth and a description of how good it is",
     "-i | --interactive           Start interactive game",
     "-f | --file        STRING    Assign file name (default: ???)"
@@ -107,13 +112,13 @@ printMakeMove :: String -> String ->  IO ()
 printMakeMove fname move = do
   putStrLn "Here is the new board:"
   game <- loadGame fname
-  let loc = (0,2)
-  putStr $ showGameState game " (before)"
-  putStr $ show $ head $ map snd (snd game)
+  loc <- readLocation move
+  putStr $ showGameState game "(before)"
+  -- putStr $ show $ head $ map snd (snd game)
   case makeMove game loc of
     Just x  -> do
       putStr $ showGameState x $ "Your input move is " ++ show loc -- move
-      putStr $ show $ head $ map snd (snd x)
+      -- putStr $ show $ head $ map snd (snd x)
     Nothing -> putStr $ showGameState game $ "Illegal move (" ++ move ++"). No move is made."
   
 
@@ -121,4 +126,31 @@ printEvalMove :: Int -> String -> IO ()
 printEvalMove depth fname = putStrLn "Here is Evaluation"
 
 startGame :: String -> IO ()
-startGame fname = putStrLn "Here is Start game"
+startGame fname = 
+  putStrLn "Here is Start game. Future kids will build this."
+
+readLocation :: String -> IO Location
+readLocation str = do
+  let lst = splitOn "," str
+  case lst of 
+    [] -> do
+      putStrLn "Location input is missing. Try again!"
+      putStr "Enter your new move as 'int,int' :"
+      loc <- getLine
+      readLocation loc
+    [a,b] -> 
+      if all (\x -> length x == 1 && (head x `elem` ['0'..'8'])) [a,b]
+      then 
+        do
+          return (read a, read b)
+      else 
+        do
+          putStrLn "indices in Location input is not within 0-8. Try again!"
+          putStr "Enter your new move as 'int,int' :"
+          loc <- getLine
+          readLocation loc
+    _ -> do
+      putStrLn "Wrong format of location. Try again!"
+      putStr "Enter your new move as 'int,int' :"
+      loc <- getLine
+      readLocation loc

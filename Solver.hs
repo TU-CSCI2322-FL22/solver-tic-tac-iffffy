@@ -75,7 +75,7 @@ updateMatrix :: BigBoard -> Player -> Location -> BigBoard
 updateMatrix bb x (r,c) =
   let (leftBoard,currentBoard:rightBoard) = splitAt r bb
       (currentWinner, Game cellsAtC) = currentBoard
-      updatedCells = Game $ take (c-1) cellsAtC  ++ [Just x] ++ drop (c + 1) cellsAtC
+      updatedCells = Game $ take c cellsAtC  ++ [Just x] ++ drop (c+1) cellsAtC
   in if miniWinner x updatedCells
         then leftBoard++[(Just x, updatedCells)]++rightBoard
      else leftBoard++[(Nothing, updatedCells)]++rightBoard
