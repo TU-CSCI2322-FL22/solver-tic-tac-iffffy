@@ -80,7 +80,7 @@ main = do
     fname        = fname
     } = opts
 
-  let searchDepth = if depth > 0 then depth else 81 -- 81 is max iteration.
+  let searchDepth = if depth > 0 then depth else -1 -- -1 means unbounded search
 
   when help (do printHelp; exitSuccess)
   when winner (printWinner fname)
