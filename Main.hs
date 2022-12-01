@@ -126,9 +126,11 @@ printMakeMove fname move = do
   
 
 printEvalMove :: Int -> String -> IO ()
+-- VERBOSE
 printEvalMove depth fname = do
   putStrLn "Here is Evaluation:"
   game <- loadGame fname
+  -- lack of make the move
   let result = scoreGame game
   case result of 
     (Win x, _) -> putStrLn $ "Player" ++ show x ++ " is winning"
