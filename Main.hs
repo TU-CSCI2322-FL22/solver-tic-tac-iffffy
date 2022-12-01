@@ -73,14 +73,14 @@ main = do
   let Options   {
     optHelp     = help,
     optWinner   = winner,
-    optDepth    = depth,
+    optDepth    = searchDepth,
     optMove     = move,
     optVerbose  = verbose,
     optInterAct = interactive,
     fname        = fname
     } = opts
 
-  let searchDepth = if depth > 0 then depth else -1 -- -1 means unbounded search
+  
 
   when help (do printHelp; exitSuccess)
   when winner (printWinner fname)
