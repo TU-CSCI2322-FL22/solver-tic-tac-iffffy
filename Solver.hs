@@ -6,6 +6,7 @@ import Data.Maybe
 import Debug.Trace
 import Data.Foldable
 
+
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
@@ -84,7 +85,7 @@ updateMatrix bb x (r,c) =
  --applies move to gamestate, uses anotherturn
 makeMove :: GameState -> Location -> Maybe GameState
 makeMove (turn, bboard) loc =
-  if checkCell loc (turn, bboard) then Just (anotherTurn turn, updateMatrix bboard Cross loc)
+  if checkCell loc (turn, bboard) then Just (anotherTurn turn, updateMatrix bboard turn loc)
   else Nothing --error "Illegal move"
 
 -- return the complement of current turn, keeps turn order
@@ -120,9 +121,8 @@ getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 --2: look for the best possible winning conditions 
 
 critical :: GameState -> ([Location],[Location]) --Checks for moves that help guarantee a win for the player 3
-critical gas =                      --for some reason gameState is now called "gas", thanks Raven lol
-  let (turn, bigBoard) = gas
-      (states, miniBoards) = unzip bigBoard
+critical gas@(turn, bigBoard) =                      --for some reason gameState is now called "gas", thanks Raven lol
+  let (states, miniBoards) = unzip bigBoard
       noWinnerBigIndices = [ x |(x,y) <- zip [0..8] states, isNothing y]
       possibleMoves = [ (x,y) | (x,y) <- getLegalMoves gas, x `elem` noWinnerBigIndices]
       (miniWinMoves, bigWinMoves) =
@@ -168,54 +168,93 @@ goodSecondPlaces enemyIndices myIndices =
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
-whoWillWin gas = 
-  let final_gas = aux gas 81
-  in  gameStateWinner final_gas
+whoWillWin gas@(turn,bboard) =
+  case gameStateWinner gas of
+    Win x -> Win x 
+    Tie   -> 
+      case getLegalMoves gas of
+        []         -> Tie
+        legalMoves -> 
+          let nextGases = mapMaybe (makeMove gas) legalMoves
+              outcomes = map gameStateWinner nextGases
+          in 
+            if Win turn `elem` outcomes then Win turn
+            else if Tie `elem` outcomes then 
+              let heh = map whoWillWin $ filter (\g -> gameStateWinner g == Tie) nextGases 
+              in if Win turn `elem` heh then Win turn
+                 else if Tie `elem` heh then Tie
+                 else Win (anotherTurn turn)
+              else Win (anotherTurn turn)
 
-  where aux :: GameState -> Int -> GameState
-        aux gas 0 = gas
-        aux gas iter = 
-          case gameStateWinner gas of 
-            Win x -> gas
-            Tie   -> let move = bestMove gas
-                     in if move == Nothing then gas
-                        else case makeMove gas (fromJust move) of
-                                Nothing -> error "Serious error, bestMove generated illegal move"
-                                Just x  -> aux x (iter-1)
+depthSearchWin :: GameState -> Int -> (Maybe [Location],Outcome) --Checks who's the closest to winning within number of depth 
+depthSearchWin gs depth = 
+  case gameStateWinner gs of
+  Win x -> (Nothing, Win x)
+  Tie   -> 
+    let (mbLocs, outcome) = aux gs depth []
+    in case mbLocs of
+      Nothing -> (Nothing, outcome)
+      Just [] -> (Nothing, outcome)
+      Just lst -> (Just lst, outcome)
+  
+  where aux :: GameState -> Int -> [[Location]] -> (Maybe [Location],Outcome)
+        aux gas 0 []    = (Nothing,gameStateWinner gas)
+        aux gas 0 (x:_) = (Just x,gameStateWinner gas)
+        aux gas@(turn,bboard) d locs =
+          case getLegalMoves gas of
+            []         -> (Nothing,gameStateWinner gas)
+            legalMoves -> 
+              let nextGases = mapMaybe (makeMove gas) legalMoves
+                  outcomes = map gameStateWinner nextGases
+                  daZip = zip legalMoves outcomes
+              in 
+                if Win turn `elem` outcomes then 
+                  let updatedLocs = locs ++ [[ a | (a,b) <- daZip, b == Win turn]]
+                  in case updatedLocs of
+                    []  -> (Nothing, Win turn)
+                    x:_ -> (Just x, Win turn)
+                else if Tie `elem` outcomes then 
+                  let updatedLocs = locs ++ [[ a | (a,b) <- daZip, b == Tie]]
+                      hehuh = map (\x -> aux x (d-1) updatedLocs) $ filter (\g -> gameStateWinner g == Tie) nextGases 
+                      heh = map snd hehuh
+                  in if Win turn `elem` heh then
+                    let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win turn]]
+                    in case updatedLocs2 of
+                      []  -> (Nothing, Win turn)
+                      x:_ -> (Just x, Win turn)
+                    else if Tie `elem` heh then 
+                      let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Tie]]
+                      in case updatedLocs2 of
+                        []  -> (Nothing, Tie)
+                        x:_ -> (Just x, Tie)
+                    else 
+                      let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win (anotherTurn turn)]]
+                      in case updatedLocs2 of
+                        []  -> (Nothing, Win (anotherTurn turn))
+                        x:_ -> (Just x, Win (anotherTurn turn))
+                  else let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win (anotherTurn turn)]]
+                    in case updatedLocs2 of
+                      []  -> (Nothing, Win (anotherTurn turn))
+                      x:_ -> (Just x, Win (anotherTurn turn))
 
---call gamestatewinner after we make a move in order to double check
--- cutOffWin :: GameState -> Int -> Outcome --Checks who's the closest to winning
--- cutOffWin gas depth = 
---   let final_gas = aux gas depth depth
---   in  gameStateWinner final_gas
 
---   where aux :: GameState -> Int -> Int -> GameState
---         aux gas 0 depth = gas
---         aux gas iter depth = 
---           case gameStateWinner gas of 
---             Win x -> gas
---             Tie   -> let move = bestMove gas
---                     in if move == Nothing then gas
---                         else case makeMove gas (fromJust move) of
---                                 Nothing -> error "Serious error, bestMove generated illegal move"
---                                 Just x  -> aux x (iter-1)
+bestMove :: GameState -> Int -> Maybe Location
+bestMove gas@(turn, bigBoard) depth =
+  let (allLocs, outcome) = depthSearchWin gas depth
+  in case allLocs of 
+      Nothing -> Nothing
+      Just [] -> error "Shouldn't be here as depthSearchWin already eliminate this case"
+      Just (x:_) -> Just x
 
-
--- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
-                    -- if equals?
-                    -- if both == 0?
-
-bestMove :: GameState -> Maybe Location
-bestMove (turn, bigBoard)=
-  let enemy = anotherTurn turn
-      (iDontWin,iWin) = critical (turn,bigBoard)
-  in case iWin of
-    x:xs  -> Just x
-    [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
-          in case enemyWin of
-            [x]   -> Just x
-            x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
-            []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
+  -- let enemy = anotherTurn turn
+  --     (iDontWin,iWin) = critical (turn,bigBoard)
+  -- in case iWin of
+  --   x:xs  -> Just x
+  --   [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
+  --         in case enemyWin of
+  --           [x]   -> Just x
+  --           x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
+  --           []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
 
 -- First check critical for me to see if I can win the whole game by 1 step
 -- if I cannot win now, then

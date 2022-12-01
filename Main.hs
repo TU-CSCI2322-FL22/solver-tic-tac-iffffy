@@ -106,7 +106,7 @@ printHelp = do
 printWinner :: String -> IO ()
 printWinner fname = do
   game <- loadGame fname
-  let bestLoc = bestMove game
+  let bestLoc = bestMove game (-1)
   case bestLoc of
     Nothing -> putStrLn "No best move"
     Just x  -> putStrLn $ "Here is the best move:" ++ show x
