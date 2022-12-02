@@ -60,7 +60,7 @@ options = [
 main :: IO ()
 main = do
   putStrLn "Welcome to Utimate tic-tac-toe"
-  putStrLn $ intercalate "\n\t" ["Authors: ","Matvei","Kenneth","Hose","Raven","Lucy"] 
+  putStrLn $ intercalate "\n\t" ["Authors: ","Matvei","Kenneth","Jose","Raven","Lucy"] 
   putStrLn "------ Enjoy! ------"
   allArgs <- getArgs
   
