@@ -5,6 +5,7 @@ import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import Data.Foldable
+import System.Posix.Internals (puts)
 
 
 -- list of possible moves for win
@@ -45,7 +46,6 @@ gameStateWinner :: GameState -> Outcome -- needs to return maybe outcome
 gameStateWinner (turn, bigBoard)
   | didIWin (winnersFor turn bigBoard) = Win turn
   | didIWin (winnersFor (anotherTurn turn) bigBoard) = Win (anotherTurn turn)
-  -- | cannotWinAtAll Cross bigBoard && cannotWinAtAll Circle bigBoard = Tie
   |  otherwise = Tie
 
 
@@ -169,101 +169,63 @@ goodSecondPlaces enemyIndices myIndices =
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
 whoWillWin gas@(turn,bboard) =
-  case gameStateWinner gas of
-    Win x -> Win x 
-    Tie   -> 
-      case getLegalMoves gas of
-        []         -> Tie
-        legalMoves -> 
-          let nextGases = mapMaybe (makeMove gas) legalMoves
-              outcomes = map gameStateWinner nextGases
+  let theFuture = peekFuture gas turn (-1) []
+      outcomes = map snd theFuture
+      crossWin = length $ filter (==Win Cross) outcomes
+      circleWin = length $ filter (==Win Circle) outcomes
+  in if crossWin > circleWin then Win Cross
+     else if crossWin < circleWin then Win Circle
+     else Tie
+
+
+peekFuture :: GameState -> Turn -> Int -> [Location] -> [([Location],Outcome)]
+peekFuture g t 0 ls = [(ls,gameStateWinner g)] 
+peekFuture g t d ls = 
+  case gameStateWinner g of
+    Win x -> [(ls,Win x)]   -- output when game already done
+    Tie -> 
+      case getLegalMoves g of
+        [] -> [(ls, gameStateWinner g)] -- output when no more move to make
+        moves ->
+          let games = mapMaybe (makeMove g) moves
+              outcomes = map gameStateWinner games
+              moveNgames = zip moves games
+              locsNoutcomes = map (\(m,gg) -> 
+                if fst gg /= t then (ls++[m],gameStateWinner gg) 
+                else (ls++[(- (fst m), - (snd m))],gameStateWinner gg) ) moveNgames
+            
           in 
-            if Win turn `elem` outcomes then Win turn
-            else if Tie `elem` outcomes then 
-              let heh = map whoWillWin $ filter (\g -> gameStateWinner g == Tie) nextGases 
-              in if Win turn `elem` heh then Win turn
-                 else if Tie `elem` heh then Tie
-                 else Win (anotherTurn turn)
-              else Win (anotherTurn turn)
-
-depthSearchWin :: GameState -> Int -> (Maybe [Location],Outcome) --Checks who's the closest to winning within number of depth 
-depthSearchWin gs depth = 
-  case gameStateWinner gs of
-  Win x -> (Nothing, Win x)
-  Tie   -> 
-    let (mbLocs, outcome) = aux gs depth []
-    in case mbLocs of
-      Nothing -> (Nothing, outcome)
-      Just [] -> (Nothing, outcome)
-      Just lst -> (Just lst, outcome)
-  
-  where aux :: GameState -> Int -> [[Location]] -> (Maybe [Location],Outcome)
-        aux gas 0 []    = (Nothing,gameStateWinner gas)
-        aux gas 0 (x:_) = (Just x,gameStateWinner gas)
-        aux gas@(turn,bboard) d locs =
-          case getLegalMoves gas of
-            []         -> (Nothing,gameStateWinner gas)
-            legalMoves -> 
-              let nextGases = mapMaybe (makeMove gas) legalMoves
-                  outcomes = map gameStateWinner nextGases
-                  daZip = zip legalMoves outcomes
-              in 
-                if Win turn `elem` outcomes then 
-                  let updatedLocs = locs ++ [[ a | (a,b) <- daZip, b == Win turn]]
-                  in case updatedLocs of
-                    []  -> (Nothing, Win turn)
-                    x:_ -> (Just x, Win turn)
-                else if Tie `elem` outcomes then 
-                  let updatedLocs = locs ++ [[ a | (a,b) <- daZip, b == Tie]]
-                      hehuh = map (\x -> aux x (d-1) updatedLocs) $ filter (\g -> gameStateWinner g == Tie) nextGases 
-                      heh = map snd hehuh
-                  in if Win turn `elem` heh then
-                    let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win turn]]
-                    in case updatedLocs2 of
-                      []  -> (Nothing, Win turn)
-                      x:_ -> (Just x, Win turn)
-                    else if Tie `elem` heh then 
-                      let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Tie]]
-                      in case updatedLocs2 of
-                        []  -> (Nothing, Tie)
-                        x:_ -> (Just x, Tie)
-                    else 
-                      let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win (anotherTurn turn)]]
-                      in case updatedLocs2 of
-                        []  -> (Nothing, Win (anotherTurn turn))
-                        x:_ -> (Just x, Win (anotherTurn turn))
-                  else let updatedLocs2 = locs ++ [[ a | (a,b) <- daZip, b == Win (anotherTurn turn)]]
-                    in case updatedLocs2 of
-                      []  -> (Nothing, Win (anotherTurn turn))
-                      x:_ -> (Just x, Win (anotherTurn turn))
-
+            if Tie `elem` outcomes then -- game incompleted
+              let recur = map (\(lNo,game) -> peekFuture game t (d-1) (fst lNo)) $ zip locsNoutcomes games
+              in concat recur
+            else locsNoutcomes
+                
+            
 
 bestMove :: GameState -> Int -> Maybe Location
 bestMove gas@(turn, bigBoard) depth =
-  let (allLocs, outcome) = depthSearchWin gas depth
-  in case allLocs of 
-      Nothing -> Nothing
-      Just [] -> error "Shouldn't be here as depthSearchWin already eliminate this case"
-      Just (x:_) -> Just x
-
-  -- let enemy = anotherTurn turn
-  --     (iDontWin,iWin) = critical (turn,bigBoard)
-  -- in case iWin of
-  --   x:xs  -> Just x
-  --   [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
-  --         in case enemyWin of
-  --           [x]   -> Just x
-  --           x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
-  --           []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
-
--- First check critical for me to see if I can win the whole game by 1 step
--- if I cannot win now, then
--- first check critical of enemy (fakeGas = (enemy, bigBoard))
--- if enemy also cannot win now
--- check get loc of miniboard to maximize win.
-
-
-
+    let theFuture = peekFuture gas turn depth []
+        outcomesCases = nub $ map snd theFuture
+    in if Win turn `notElem` outcomesCases then Nothing
+        else 
+          let sortedSpeed = sortBy (\a b-> compare (length (fst a)) (length (fst b))) theFuture
+              outcomes = map snd sortedSpeed
+              minTieIndices = 
+                let lst =  filter (\(a,b) -> b == Tie) $ zip [0..] outcomes
+                in if null lst then -1 else fst $ head lst
+              minWinIndices = 
+                let lst =  filter (\(a,b) -> b == Win turn) $ zip [0..] outcomes
+                in if null lst then -1 else fst $ head lst
+              minLoseIndices = 
+                let lst =  filter (\(a,b) -> b == Win (anotherTurn turn)) $ zip [0..] outcomes
+                in if null lst then -1 else fst $ head lst
+          in
+             if minWinIndices >= 0 && (minWinIndices < minLoseIndices || minLoseIndices < 0) then
+                Just $ head $ fst $ sortedSpeed !! minWinIndices
+             else if (minWinIndices < 0 || (minWinIndices > minLoseIndices && minLoseIndices >= 0)) && (minTieIndices < minLoseIndices && minTieIndices >= 0 ) then
+                  Just $ head $ fst $ sortedSpeed !! minTieIndices
+                  else Nothing
+                    
 -- checks the best second location for player on miniboard assuming there are no good first locations
 bestSndLocation locs player mb = let sqs = squaresFor player mb
                                  in [[[loc | sq <- sqs, sq `elem` win] | win <- possibleWins, loc `elem` win] | loc <- locs]

@@ -168,3 +168,8 @@ readLocation str = do
       putStr "Enter your new move as 'int,int' :"
       loc <- getLine
       readLocation loc
+
+
+
+printGame :: GameState -> IO()
+printGame game = putStr $ showGameState game ""
