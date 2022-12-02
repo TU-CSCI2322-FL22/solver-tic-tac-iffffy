@@ -133,7 +133,7 @@ printEvalMove depth fname = do
   -- lack of make the move
   let result = scoreGame game
   case result of 
-    (Win x, _) -> putStrLn $ "Player" ++ show x ++ " is winning"
+    (Win x, _) -> putStrLn $ "Player " ++ show x ++ " has won!!!!!!!!\n"
     (Tie, 0 )   -> putStrLn "Tie!!!!!!"
     (Tie, s )   -> 
       if s > 0 then putStrLn $ "Player Cross is leading with score " ++ show s
@@ -168,3 +168,8 @@ readLocation str = do
       putStr "Enter your new move as 'int,int' :"
       loc <- getLine
       readLocation loc
+
+
+
+printGame :: GameState -> IO()
+printGame game = putStr $ showGameState game ""
