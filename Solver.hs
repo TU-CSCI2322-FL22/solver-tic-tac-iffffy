@@ -104,7 +104,7 @@ getCellOfLocation (bigIndex, miniIndex) (_,bboard)
   | otherwise = let (states, miniboards) = unzip bboard
                     (Game thatMiniBoard) = (miniboards !! bigIndex)
                     state = (states !! bigIndex)
-                in if state == Tie then Just $ thatMiniBoard !! miniIndex else Nothing
+                in if state == Nothing then Just $ thatMiniBoard !! miniIndex else Nothing
 
 -- checks if cell is empty or not, returns true or false for legal moves
 checkCell :: Location -> GameState -> Bool
@@ -139,9 +139,9 @@ getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 --                                ) ([],[]) possibleMoves
 --   in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
 
-scoreGame :: GameState -> (Outcome, Ratio Int)
-scoreGame gas@(t,bboard) = 
-  let theFuture = peekFuture gas t (-1) []
+scoreGame :: GameState -> Int -> (Outcome, Ratio Int)
+scoreGame gas@(t,bboard) depth = 
+  let theFuture = peekFuture gas t depth []
       outcomes = map snd theFuture
       crossScore  = fromIntegral (length (filter (==Win Cross) outcomes)) % fromIntegral (length outcomes)
       circleScore = fromIntegral (length (filter (==Win Circle) outcomes))  % fromIntegral (length outcomes)

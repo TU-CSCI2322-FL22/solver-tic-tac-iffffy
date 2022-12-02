@@ -131,7 +131,7 @@ printEvalMove depth fname = do
   putStrLn "Here is Evaluation:"
   game <- loadGame fname
   -- lack of make the move
-  let result = scoreGame game
+  let result = scoreGame game depth
   case result of 
     (Win x, _) -> putStrLn $ "Player " ++ show x ++ " has won!!!!!!!!\n"
     (Tie, 0 )   -> putStrLn "Tie!!!!!!"
