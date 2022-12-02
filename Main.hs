@@ -60,7 +60,7 @@ options = [
 main :: IO ()
 main = do
   putStrLn "Welcome to Utimate tic-tac-toe"
-  putStrLn $ intercalate "\n\t" ["Authors: ","Matvei","Kenneth","Hose","Raven","Lucy"] 
+  putStrLn $ intercalate "\n\t" ["Authors: ","Matvei","Kenneth","Jose","Raven","Lucy"] 
   putStrLn "------ Enjoy! ------"
   allArgs <- getArgs
   
@@ -73,14 +73,14 @@ main = do
   let Options   {
     optHelp     = help,
     optWinner   = winner,
-    optDepth    = depth,
+    optDepth    = searchDepth,
     optMove     = move,
     optVerbose  = verbose,
     optInterAct = interactive,
     fname        = fname
     } = opts
 
-  let searchDepth = if depth > 0 then depth else 81 -- 81 is max iteration.
+  
 
   when help (do printHelp; exitSuccess)
   when winner (printWinner fname)
@@ -106,7 +106,7 @@ printHelp = do
 printWinner :: String -> IO ()
 printWinner fname = do
   game <- loadGame fname
-  let bestLoc = bestMove game
+  let bestLoc = bestMove game (-1)
   case bestLoc of
     Nothing -> putStrLn "No best move"
     Just x  -> putStrLn $ "Here is the best move:" ++ show x
@@ -126,7 +126,18 @@ printMakeMove fname move = do
   
 
 printEvalMove :: Int -> String -> IO ()
-printEvalMove depth fname = putStrLn "Here is Evaluation"
+-- VERBOSE
+printEvalMove depth fname = do
+  putStrLn "Here is Evaluation:"
+  game <- loadGame fname
+  -- lack of make the move
+  let result = scoreGame game
+  case result of 
+    (Win x, _) -> putStrLn $ "Player " ++ show x ++ " has won!!!!!!!!\n"
+    (Tie, 0 )   -> putStrLn "Tie!!!!!!"
+    (Tie, s )   -> 
+      if s > 0 then putStrLn $ "Player Cross is leading with score " ++ show s
+      else putStrLn $ "Player Circle is leading with score " ++ show (-s)
 
 startGame :: String -> IO ()
 startGame fname = 
@@ -157,3 +168,8 @@ readLocation str = do
       putStr "Enter your new move as 'int,int' :"
       loc <- getLine
       readLocation loc
+
+
+
+printGame :: GameState -> IO()
+printGame game = putStr $ showGameState game ""

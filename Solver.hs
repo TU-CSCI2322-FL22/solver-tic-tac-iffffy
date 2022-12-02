@@ -5,6 +5,7 @@ import Data.List.Split
 import Data.Maybe
 import Debug.Trace
 import Data.Foldable
+import Data.Ratio
 
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
@@ -44,7 +45,6 @@ gameStateWinner :: GameState -> Outcome -- needs to return maybe outcome
 gameStateWinner (turn, bigBoard)
   | didIWin (winnersFor turn bigBoard) = Win turn
   | didIWin (winnersFor (anotherTurn turn) bigBoard) = Win (anotherTurn turn)
-  -- | cannotWinAtAll Cross bigBoard && cannotWinAtAll Circle bigBoard = Tie
   |  otherwise = Tie
 
 
@@ -83,9 +83,13 @@ updateMatrix bb x (r,c) =
 
  --applies move to gamestate, uses anotherturn
 makeMove :: GameState -> Location -> Maybe GameState
-makeMove (turn, bboard) loc =
-  if checkCell loc (turn, bboard) then Just (anotherTurn turn, updateMatrix bboard Cross loc)
-  else Nothing --error "Illegal move"
+makeMove gas@(turn, bboard) loc =
+  case  gameStateWinner gas of 
+    Tie -> 
+        if checkCell loc (turn, bboard)
+          then Just (anotherTurn turn, updateMatrix bboard turn loc)
+        else Nothing --error "Illegal move"
+    Win x -> Just (x, updateMatrix bboard turn loc)
 
 -- return the complement of current turn, keeps turn order
 anotherTurn :: Turn -> Turn
@@ -119,112 +123,117 @@ getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 --1: the current sign (circle or cross) needs to block their opponent from winning on their next turn
 --2: look for the best possible winning conditions 
 
-critical :: GameState -> ([Location],[Location]) --Checks for moves that help guarantee a win for the player 3
-critical gas =                      --for some reason gameState is now called "gas", thanks Raven lol
-  let (turn, bigBoard) = gas
-      (states, miniBoards) = unzip bigBoard
-      noWinnerBigIndices = [ x |(x,y) <- zip [0..8] states, isNothing y]
-      possibleMoves = [ (x,y) | (x,y) <- getLegalMoves gas, x `elem` noWinnerBigIndices]
-      (miniWinMoves, bigWinMoves) =
-        foldl (\lst loc ->
-                         let (newStates,_) = unzip (updateMatrix bigBoard turn loc)
-                             miniList = if newStates /= states then loc:fst lst else fst lst
-                             bigList = if didIWin [ index | (index,state) <- zip [0..8] newStates, state == Just turn]
-                                      then loc:fst lst else fst lst
-                          in (miniList, bigList)
-                               ) ([],[]) possibleMoves
-  in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
+-- critical :: GameState -> ([Location],[Location]) --Checks for moves that help guarantee a win for the player 3
+-- critical gas@(turn, bigBoard) =                      --for some reason gameState is now called "gas", thanks Raven lol
+--   let (states, miniBoards) = unzip bigBoard
+--       noWinnerBigIndices = [ x |(x,y) <- zip [0..8] states, isNothing y]
+--       possibleMoves = [ (x,y) | (x,y) <- getLegalMoves gas, x `elem` noWinnerBigIndices]
+--       (miniWinMoves, bigWinMoves) =
+--         foldl (\lst loc ->
+--                          let (newStates,_) = unzip (updateMatrix bigBoard turn loc)
+--                              miniList = if newStates /= states then loc:fst lst else fst lst
+--                              bigList = if didIWin [ index | (index,state) <- zip [0..8] newStates, state == Just turn]
+--                                       then loc:fst lst else fst lst
+--                           in (miniList, bigList)
+--                                ) ([],[]) possibleMoves
+--   in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
 
-scoreGame :: GameState -> (Outcome,Int)
-scoreGame (t,bboard) = 
-  let crossScore  = length a + 10 * length b where (a,b) = critical (Cross, bboard) 
-      circleScore = length a + 10 * length b where (a,b) = critical (Circle, bboard) 
+scoreGame :: GameState -> (Outcome, Ratio Int)
+scoreGame gas@(t,bboard) = 
+  let theFuture = peekFuture gas t (-1) []
+      outcomes = map snd theFuture
+      crossScore  = fromIntegral (length (filter (==Win Cross) outcomes)) % fromIntegral (length outcomes)
+      circleScore = fromIntegral (length (filter (==Win Circle) outcomes))  % fromIntegral (length outcomes)
   in (gameStateWinner (t,bboard), crossScore - circleScore)
 
 
-sortCriticalOfMiniBoards :: GameState -> [Location] -> [Location]
--- sort the locations according to best places to build win (a.k.a second mark)
-sortCriticalOfMiniBoards _ [] = []
-sortCriticalOfMiniBoards (turn,bigBoard) locations =
-  let enemyIndices = winnersFor (anotherTurn turn) bigBoard
-      myIndices = winnersFor turn bigBoard
-      orderOfBigIndices = goodSecondPlaces enemyIndices myIndices
-  in sortWithOrder orderOfBigIndices locations
-  where sortWithOrder :: [BigBoardIndex] -> [Location] -> [Location]
-        sortWithOrder lst locs = concat [ filter (\(x,y) -> x == i) locs | i <- lst ]
+-- sortCriticalOfMiniBoards :: GameState -> [Location] -> [Location]
+-- -- sort the locations according to best places to build win (a.k.a second mark)
+-- sortCriticalOfMiniBoards _ [] = []
+-- sortCriticalOfMiniBoards (turn,bigBoard) locations =
+--   let enemyIndices = winnersFor (anotherTurn turn) bigBoard
+--       myIndices = winnersFor turn bigBoard
+--       orderOfBigIndices = goodSecondPlaces enemyIndices myIndices
+--   in sortWithOrder orderOfBigIndices locations
+--   where sortWithOrder :: [BigBoardIndex] -> [Location] -> [Location]
+--         sortWithOrder lst locs = concat [ filter (\(x,y) -> x == i) locs | i <- lst ]
 
-goodSecondPlaces :: [Int] -> [Int] -> [Int]
-goodSecondPlaces enemyIndices myIndices =
-  -- In case of no location leads to direct win, this generate list of locations 
-  -- where the first one(s) is the best move according to number of winning path it can open
-  let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
-      currentPossibleWins =
-        case filter (\x -> any (`elem` myIndices) x && not (any (`elem` enemyIndices) x)) possibleWins  of
-            [] -> possibleWins
-            x -> x
-      good = filter (`elem` remaining) $ map fst (last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins)
-  in good ++ filter (`notElem` good) remaining
+-- goodSecondPlaces :: [Int] -> [Int] -> [Int]
+-- goodSecondPlaces enemyIndices myIndices =
+--   -- In case of no location leads to direct win, this generate list of locations 
+--   -- where the first one(s) is the best move according to number of winning path it can open
+--   let remaining = filter (`notElem` enemyIndices ++ myIndices) [0..8]
+--       currentPossibleWins =
+--         case filter (\x -> any (`elem` myIndices) x && not (any (`elem` enemyIndices) x)) possibleWins  of
+--             [] -> possibleWins
+--             x -> x
+--       good = filter (`elem` remaining) $ map fst (last $ groupBy (\(_,x) (_,y) -> x == y) $ sortOn snd $ map (\lst -> (head lst, length lst)) $ groupBy (==) $ sort $ concat currentPossibleWins)
+--   in good ++ filter (`notElem` good) remaining
 
 
 --call gamestatewinner after we make a move in order to double check
 whoWillWin :: GameState -> Outcome --Checks who's the closest to winning
-whoWillWin gas = 
-  let final_gas = aux gas 81
-  in  gameStateWinner final_gas
-
-  where aux :: GameState -> Int -> GameState
-        aux gas 0 = gas
-        aux gas iter = 
-          case gameStateWinner gas of 
-            Win x -> gas
-            Tie   -> let move = bestMove gas
-                     in if move == Nothing then gas
-                        else case makeMove gas (fromJust move) of
-                                Nothing -> error "Serious error, bestMove generated illegal move"
-                                Just x  -> aux x (iter-1)
-
---call gamestatewinner after we make a move in order to double check
--- cutOffWin :: GameState -> Int -> Outcome --Checks who's the closest to winning
--- cutOffWin gas depth = 
---   let final_gas = aux gas depth depth
---   in  gameStateWinner final_gas
-
---   where aux :: GameState -> Int -> Int -> GameState
---         aux gas 0 depth = gas
---         aux gas iter depth = 
---           case gameStateWinner gas of 
---             Win x -> gas
---             Tie   -> let move = bestMove gas
---                     in if move == Nothing then gas
---                         else case makeMove gas (fromJust move) of
---                                 Nothing -> error "Serious error, bestMove generated illegal move"
---                                 Just x  -> aux x (iter-1)
+whoWillWin gas@(turn,bboard) =
+  let theFuture = peekFuture gas turn (-1) []
+      outcomes = map snd theFuture
+      crossWin = length $ filter (==Win Cross) outcomes
+      circleWin = length $ filter (==Win Circle) outcomes
+  in if crossWin > circleWin then Win Cross
+     else if crossWin < circleWin then Win Circle
+     else Tie
 
 
--- Just brainstorming: measure is by who own more winning paths on BigBoard? does win potential on miniBoards matters?
-                    -- if equals?
-                    -- if both == 0?
+peekFuture :: GameState -> Turn -> Int -> [Location] -> [([Location],Outcome)]
+peekFuture g t 0 ls = [(ls,gameStateWinner g)] 
+peekFuture g t d ls = 
+  case gameStateWinner g of
+    Win x -> [(ls,Win x)]   -- output when game already done
+    Tie -> 
+      case getLegalMoves g of
+        [] -> [(ls, gameStateWinner g)] -- output when no more move to make
+        moves ->
+          let games = mapMaybe (makeMove g) moves
+              outcomes = map gameStateWinner games
+              moveNgames = zip moves games
+              locsNoutcomes = map (\(m,gg) -> 
+                if fst gg /= t then (ls++[m],gameStateWinner gg) 
+                else (ls++[(- (fst m), - (snd m))],gameStateWinner gg) ) moveNgames
+            
+          in 
+            if Tie `elem` outcomes then -- game incompleted
+              let recur = map (\(lNo,game) -> peekFuture game t (d-1) (fst lNo)) $ zip locsNoutcomes games
+              in concat recur
+            else locsNoutcomes
+                
+            
 
-bestMove :: GameState -> Maybe Location
-bestMove (turn, bigBoard)=
-  let enemy = anotherTurn turn
-      (iDontWin,iWin) = critical (turn,bigBoard)
-  in case iWin of
-    x:xs  -> Just x
-    [] -> let (enemydontWin,enemyWin) = critical (enemy,bigBoard)
-          in case enemyWin of
-            [x]   -> Just x
-            x:xs  -> Just x -- can I surrender :) enemy has more than 1 way to win bigBoard
-            []    -> if iDontWin == [] then Nothing else Just (head iDontWin)
-
--- First check critical for me to see if I can win the whole game by 1 step
--- if I cannot win now, then
--- first check critical of enemy (fakeGas = (enemy, bigBoard))
--- if enemy also cannot win now
--- check get loc of miniboard to maximize win.
-
-
-
+bestMove :: GameState -> Int -> Maybe Location
+bestMove gas@(turn, bigBoard) depth =
+  case gameStateWinner gas of
+    Win _ -> Nothing 
+    Tie  -> 
+      let theFuture = peekFuture gas turn depth []
+          outcomesCases = nub $ map snd theFuture
+      in if Win turn `notElem` outcomesCases then Nothing
+          else 
+            let sortedSpeed = sortBy (\a b-> compare (length (fst a)) (length (fst b))) theFuture
+                outcomes = map snd sortedSpeed
+                minTieIndices = 
+                  let lst =  filter (\(a,b) -> b == Tie) $ zip [0..] outcomes
+                  in if null lst then -1 else fst $ head lst
+                minWinIndices = 
+                  let lst =  filter (\(a,b) -> b == Win turn) $ zip [0..] outcomes
+                  in if null lst then -1 else fst $ head lst
+                minLoseIndices = 
+                  let lst =  filter (\(a,b) -> b == Win (anotherTurn turn)) $ zip [0..] outcomes
+                  in if null lst then -1 else fst $ head lst
+            in
+              if minWinIndices >= 0 && (minWinIndices < minLoseIndices || minLoseIndices < 0) then
+                  let x = fst $ sortedSpeed !! minWinIndices in if null x then Nothing else Just $ head x
+              else if (minWinIndices < 0 || (minWinIndices > minLoseIndices && minLoseIndices >= 0)) && (minTieIndices < minLoseIndices && minTieIndices >= 0 ) then
+                    let x = fst $ sortedSpeed !! minTieIndices in if null x then Nothing else Just $ head x
+                    else Nothing
+                    
 -- checks the best second location for player on miniboard assuming there are no good first locations
 bestSndLocation locs player mb = let sqs = squaresFor player mb
                                  in [[[loc | sq <- sqs, sq `elem` win] | win <- possibleWins, loc `elem` win] | loc <- locs]
