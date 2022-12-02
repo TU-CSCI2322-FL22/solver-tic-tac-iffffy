@@ -1,14 +1,19 @@
-Tic Tac Iffffy
+GROUP NAME: Tic Tac Iffffy
 
-raver
+MEMBER: 
 
-kenneff
+Raver
+
+Kenneff
 
 Matvei
 
-hose
+Hose
 
-lucy
+Lucy
 
-New Name
+USAGE:
+
+  'make'
+  './theGame -h'
 
