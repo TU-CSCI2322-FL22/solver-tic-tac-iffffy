@@ -14,6 +14,7 @@ Lucy
 
 USAGE:
 
-  'make'
-  './theGame -h'
+  make
+  
+  ./theGame -h
 
