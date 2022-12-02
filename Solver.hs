@@ -99,7 +99,8 @@ getCellOfLocation (bigIndex, miniIndex) (_,bboard)
   | bigIndex < 0 || miniIndex < 0 || bigIndex > 8 || miniIndex > 8 = Nothing -- error "IndexOutOfBound in getCellOfLocation"
   | otherwise = let (states, miniboards) = unzip bboard
                     (Game thatMiniBoard) = (miniboards !! bigIndex)
-                in Just $ thatMiniBoard !! miniIndex
+                    state = (states !! bigIndex)
+                in if state == Tie then Just $ thatMiniBoard !! miniIndex else Nothing
 
 -- checks if cell is empty or not, returns true or false for legal moves
 checkCell :: Location -> GameState -> Bool
