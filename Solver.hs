@@ -83,9 +83,13 @@ updateMatrix bb x (r,c) =
 
  --applies move to gamestate, uses anotherturn
 makeMove :: GameState -> Location -> Maybe GameState
-makeMove (turn, bboard) loc =
-  if checkCell loc (turn, bboard) then Just (anotherTurn turn, updateMatrix bboard turn loc)
-  else Nothing --error "Illegal move"
+makeMove gas@(turn, bboard) loc =
+  case  gameStateWinner gas of 
+    Tie -> 
+        if checkCell loc (turn, bboard)
+          then Just (anotherTurn turn, updateMatrix bboard turn loc)
+        else Nothing --error "Illegal move"
+    Win x -> Just (x, updateMatrix bboard turn loc)
 
 -- return the complement of current turn, keeps turn order
 anotherTurn :: Turn -> Turn
