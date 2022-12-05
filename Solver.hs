@@ -187,12 +187,12 @@ bestMove2 gas@(turn, bigBoard) depth =
       case getLegalMoves gas of
         [] -> error "Should not be the case for on-going game"
         moves -> 
-          let scores = map whoMightWin (_,depth) $ mapMaybe (makeMove gas) moves
+          let scores = map whoMightWin (_,depth) $ mapMaybe (makeMove gas) moves -- how to map function woth the depth argument?
           in if length scores /= length moves then error "Should not happen at all"
              else 
               let locNout = zip moves scores  
               in if turn == Cross then
-                  Just $ fst $ maximumBy (comparing snd) locNout
+                  Just $ fst $ maximumBy (comparing `on` snd) locNout -- find mximum in a zipped list using score
                 else if turn == Circle then
-                  Just $ fst $ minimumBy (comparing snd) locNout
+                  Just $ fst $ minimumBy (comparing `on` snd) locNout
                 else Nothing
