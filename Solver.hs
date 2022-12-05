@@ -29,6 +29,14 @@ squaresFor player (Game mb) = [ loc | (loc, piece) <- zip [0..] mb, piece == Jus
 miniWinner :: Player -> MiniBoard -> Bool
 miniWinner player mb = didIWin (squaresFor player mb)
 
+miniTie :: MiniBoard -> Bool
+miniTie (Game mb) = (length mb) == (length (catMaybes mb))
+
+isTie :: BigBoard -> Bool
+isTie bb = let (_, brds) = unzip bb
+               bw = [miniTie mb | mb <- brds]  
+           in all (==True) bw
+
 -- return whether the player win (either mini or big board) according to the list of indices (either BigBoardIndices or MiniBoardIndices)
 didIWin :: [Int] -> Bool
 didIWin indices =
@@ -41,11 +49,12 @@ winnersFor player bboard =
   in [ loc | (loc, piece) <- zip [0..] states, piece == Just player ]
 
 -- return the outcome of the game at that game-state
-gameStateWinner :: GameState -> Outcome -- needs to return maybe outcome
+gameStateWinner :: GameState -> Maybe Outcome -- needs to return maybe outcome
 gameStateWinner (turn, bigBoard)
-  | didIWin (winnersFor turn bigBoard) = Win turn
-  | didIWin (winnersFor (anotherTurn turn) bigBoard) = Win (anotherTurn turn)
-  |  otherwise = Tie
+  | didIWin (winnersFor turn bigBoard) = Just (Win turn)
+  | didIWin (winnersFor (anotherTurn turn) bigBoard) = Just (Win (anotherTurn turn))
+  | isTie bigBoard = Just Tie
+  | otherwise = Nothing
 
 
 -- cannotWinAtAll :: Player -> BigBoard -> Bool
@@ -85,11 +94,12 @@ updateMatrix bb x (r,c) =
 makeMove :: GameState -> Location -> Maybe GameState
 makeMove gas@(turn, bboard) loc =
   case  gameStateWinner gas of 
-    Tie -> 
+    Nothing -> 
         if checkCell loc (turn, bboard)
           then Just (anotherTurn turn, updateMatrix bboard turn loc)
         else Nothing --error "Illegal move"
-    Win x -> Just (x, updateMatrix bboard turn loc)
+    Just (Win x) -> Just (x, updateMatrix bboard turn loc)
+    Just Tie -> Nothing
 
 -- return the complement of current turn, keeps turn order
 anotherTurn :: Turn -> Turn
@@ -139,7 +149,7 @@ getLegalMoves gas = [(x,y) | x <- [0..8], y <- [0..8], checkCell (x,y) gas]
 --                                ) ([],[]) possibleMoves
 --   in (sortCriticalOfMiniBoards gas $ filter (`notElem` bigWinMoves) miniWinMoves,bigWinMoves)
 
-scoreGame :: GameState -> Int -> (Outcome, Ratio Int)
+scoreGame :: GameState -> Int -> (Maybe Outcome, Ratio Int)
 scoreGame gas@(t,bboard) depth = 
   let theFuture = peekFuture gas t depth []
       outcomes = map snd theFuture
