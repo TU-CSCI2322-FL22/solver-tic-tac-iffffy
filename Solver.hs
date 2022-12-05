@@ -190,11 +190,9 @@ bestMove2 gas@(turn, bigBoard) depth =
           let scores = map whoMightWin (_,depth) $ mapMaybe (makeMove gas) moves
           in if length scores /= length moves then error "Should not happen at all"
              else 
-              let locNout = zip moves scores 
+              let locNout = zip moves scores  
               in if turn == Cross then
-                  Just $ fst $ head $ filter (\(loc,out) -> out == Win turn ) locNout
+                  Just $ fst $ maximumBy (comparing snd) locNout
                 else if turn == Circle then
-                  Just $ fst $ head $ filter (\(loc,out) -> out == Win turn ) locNout
-                else if Tie `elem` outcomes then 
-                  Just $ fst $ head $ filter (\(loc,out) -> out == Tie ) locNout
+                  Just $ fst $ minimumBy (comparing snd) locNout
                 else Nothing
