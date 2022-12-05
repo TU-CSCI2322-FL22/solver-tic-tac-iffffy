@@ -7,6 +7,7 @@ import Debug.Trace
 import Data.Foldable
 import Data.Ratio
 
+import Data.Either
 -- list of possible moves for win
 possibleWins = [[0,1,2],[3,4,5],[6,7,8],
                [0,3,6],[1,4,7],[2,5,8],
@@ -157,10 +158,11 @@ scoreIndices p1 p2 =
       scoreP2 = fst $ maximum $ [ (length [ x | x <- p, x `elem` p2],length [ x | x <- p, x `elem` p1]) | p <- possibleWins ]
   in scoreP1 - scoreP2
 
+
 --call gamestatewinner after we make a move in order to double check
-whoMightWin :: GameState -> Int -> Either Outcome Int 
-whoMightWin gas@(turn,bboard) 0 = 
-  case gameStateWinner gas of 
+whoMightWin :: GameState -> Int -> Either Outcome Int
+whoMightWin gas@(turn,bboard) 0 =
+  case gameStateWinner gas of
     Nothing ->  Right (scoreGame gas)
     Just x  -> Left x
 
@@ -173,11 +175,15 @@ whoMightWin gas@(turn,bboard) depth =
         legalMoves ->
           let nextGases = mapMaybe (makeMove gas) legalMoves
               scoreOfOutcomes = map (\g -> whoMightWin g (depth-1)) nextGases
-              maxScore = maximum scoreOfOutcomes
-              minScore = minimum scoreOfOutcomes
-          in if  maxScore + minScore > 0 then Right (maxScore)
-             else if maxScore + minScore < 0 then Right minScore
-                  else Right 0
+          in if Win turn `elem` lefts scoreOfOutcomes then Left (Win turn)
+             else if Tie `elem` lefts scoreOfOutcomes then Left Tie
+                  else if null (rights scoreOfOutcomes) && Win (anotherTurn turn) `elem` lefts scoreOfOutcomes then Left (Win (anotherTurn turn))
+                       else let maxScore = maximum $ rights scoreOfOutcomes
+                                minScore = minimum $ rights scoreOfOutcomes
+                            in if maxScore + minScore > 0 then Right maxScore
+                               else if maxScore + minScore < 0 then Right minScore
+                                    else Right 0
+
 
 bestMove2 :: GameState -> Int -> Maybe Location
 bestMove2 gas@(turn, bigBoard) depth = 
@@ -187,12 +193,13 @@ bestMove2 gas@(turn, bigBoard) depth =
       case getLegalMoves gas of
         [] -> error "Should not be the case for on-going game"
         moves -> 
-          let scores = map whoMightWin (_,depth) $ mapMaybe (makeMove gas) moves -- how to map function woth the depth argument?
+          let scores = map (`whoMightWin` depth) $ mapMaybe (makeMove gas) moves
           in if length scores /= length moves then error "Should not happen at all"
              else 
               let locNout = zip moves scores  
-              in if turn == Cross then
-                  Just $ fst $ maximumBy (comparing `on` snd) locNout -- find mximum in a zipped list using score
-                else if turn == Circle then
-                  Just $ fst $ minimumBy (comparing `on` snd) locNout
-                else Nothing
+              in undefined
+                -- if turn == Cross then
+                --   Just $ fst $ maximumBy (comparing `on` snd) locNout -- find mximum in a zipped list using score
+                -- else if turn == Circle then
+                --   Just $ fst $ minimumBy (comparing `on` snd) locNout
+                -- else Nothing
