@@ -106,7 +106,7 @@ printHelp = do
 printWinner :: String -> IO ()
 printWinner fname = do
   game <- loadGame fname
-  let bestLoc = bestMove game (-1)
+  let bestLoc = bestMove game
   case bestLoc of
     Nothing -> putStrLn "No best move"
     Just x  -> putStrLn $ "Here is the best move:" ++ show x
@@ -127,17 +127,28 @@ printMakeMove fname move = do
 
 printEvalMove :: Int -> String -> IO ()
 -- VERBOSE
-printEvalMove depth fname = do
-  putStrLn "Here is Evaluation:"
-  game <- loadGame fname
-  -- lack of make the move
-  let result = scoreGame game depth
-  case result of 
-    (Win x, _) -> putStrLn $ "Player " ++ show x ++ " has won!!!!!!!!\n"
-    (Tie, 0 )   -> putStrLn "Tie!!!!!!"
-    (Tie, s )   -> 
-      if s > 0 then putStrLn $ "Player Cross is leading with score " ++ show s
-      else putStrLn $ "Player Circle is leading with score " ++ show (-s)
+printEvalMove depth fname = 
+  do
+    game <- loadGame fname
+    let move = case bestMove2 game of 
+      Nothing -> putStr "no best move founded in the case"
+      Just x -> x
+      newGame = case makeMove game move of
+        Nothing -> error "This should not be"
+        Just g -> g
+    in undefined
+  -- do
+  -- putStrLn "Here is Evaluation:"
+  -- game <- loadGame fname
+  -- -- lack of make the move
+  -- let result = scoreGame game depth
+  -- case result of 
+  --   (Win x, _) -> putStrLn $ "Player " ++ show x ++ " has won!!!!!!!!\n"
+  --   (Tie, 0 )   -> putStrLn "Tie!!!!!!"
+  --   (Tie, s )   -> do
+  --     newgame = makeMove 
+  --     if s > 0 then putStrLn $ "Player Cross is leading with score " ++ show s
+  --     else putStrLn $ "Player Circle is leading with score " ++ show (-s)
 
 startGame :: String -> IO ()
 startGame fname = 
