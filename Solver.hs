@@ -118,10 +118,13 @@ whoWillWin gas@(turn,bboard) =
         legalMoves ->
           let nextGases = mapMaybe (makeMove gas) legalMoves
               outcomes = map whoWillWin nextGases
-          in
-            if Win turn `elem` outcomes then Win turn
-            else if Tie `elem` outcomes then Tie
-              else Win (anotherTurn turn)
+          in bestOutcomeFor turn outcomes
+
+bestOutcomeFor :: Turn -> [Outcome] -> Outcome
+bestOutcomeFor turn outcomes = 
+  if Win turn `elem` outcomes then Win turn
+  else if Tie `elem` outcomes then Tie
+       else Win (anotherTurn turn)
 
 
 bestMove :: GameState -> Maybe Location
@@ -134,23 +137,29 @@ bestMove gas@(turn, bigBoard) =
         moves -> 
           let outcomes = map whoWillWin $ mapMaybe (makeMove gas) moves
           in if length outcomes /= length moves then error "Should not happen at all"
-             else 
-              let locNout = zip moves outcomes 
-              in if Win turn `elem` outcomes then
-                Just $ fst $ head $ filter (\(loc,out) -> out == Win turn ) locNout
-                else if Tie `elem` outcomes then 
-                  Just $ fst $ head $ filter (\(loc,out) -> out == Tie ) locNout
-                else Nothing
+             else bestMoveFor turn outcomes moves
+
+bestMoveFor :: Turn -> [Outcome] -> [Location] -> Maybe Location
+bestMoveFor turn outcomes locs = 
+  let locNout = zip locs outcomes 
+  in if Win turn `elem` outcomes then
+        Just $ fst $ head $ filter (\(loc,out) -> out == Win turn ) locNout
+      else if Tie `elem` outcomes then 
+          Just $ fst $ head $ filter (\(loc,out) -> out == Tie ) locNout
+        else Just $ head locs
 
 -- evaluation of game
 scoreGame :: GameState -> Int 
 scoreGame gas@(t,bboard) =
+  case gameStateWinner gas of
+    Nothing -> 
       let (bboardIndx1,bboardIndx2) =(winnersFor Cross bboard,winnersFor Circle bboard)
           miniIndx1 = map (\(_,mb) -> squaresFor Cross mb) bboard
           miniIndx2 = map (\(_,mb) -> squaresFor Circle mb) bboard
           scoreP1 = sum $ map (\(a,b) -> scoreIndices a b) $ zip (bboardIndx1:miniIndx1) (bboardIndx2:miniIndx2)
           scoreP2 = sum $ map (\(a,b) -> scoreIndices b a) $ zip (bboardIndx1:miniIndx1) (bboardIndx2:miniIndx2)
       in scoreP1 - scoreP2
+    Just x -> scoreOutcome x
 
 scoreIndices :: [Int] -> [Int] -> Int
 scoreIndices p1 p2 = 
@@ -158,32 +167,35 @@ scoreIndices p1 p2 =
       scoreP2 = fst $ maximum $ [ (length [ x | x <- p, x `elem` p2],length [ x | x <- p, x `elem` p1]) | p <- possibleWins ]
   in scoreP1 - scoreP2
 
+scoreOutcome :: Outcome -> Int
+scoreOutcome (Win Cross) = 2000
+scoreOutcome (Win Circle) = -2000
+scoreOutcome Tie = 0
 
+bestScoreFor  :: Ord a => Turn -> [a] -> a
+bestScoreFor Cross scs = maximum scs
+bestScoreFor Circle scs = minimum scs
+  
 --call gamestatewinner after we make a move in order to double check
-whoMightWin :: GameState -> Int -> Either Outcome Int
+whoMightWin :: GameState -> Int ->  Int
 whoMightWin gas@(turn,bboard) 0 =
   case gameStateWinner gas of
-    Nothing ->  Right (scoreGame gas)
-    Just x  -> Left x
+    Nothing ->  scoreGame gas
+    Just x  -> scoreOutcome x
+
 
 whoMightWin gas@(turn,bboard) depth =
   case gameStateWinner gas of
-    Just x  -> Left x
+    Just x  -> scoreOutcome x
     Nothing ->
       case getLegalMoves gas of
         []         -> error "Should have legal moves when game is on-going"
         legalMoves ->
           let nextGases = mapMaybe (makeMove gas) legalMoves
               scoreOfOutcomes = map (\g -> whoMightWin g (depth-1)) nextGases
-          in if Win turn `elem` lefts scoreOfOutcomes then Left (Win turn)
-             else if Tie `elem` lefts scoreOfOutcomes then Left Tie
-                  else if null (rights scoreOfOutcomes) && Win (anotherTurn turn) `elem` lefts scoreOfOutcomes then Left (Win (anotherTurn turn))
-                       else let maxScore = maximum $ rights scoreOfOutcomes
-                                minScore = minimum $ rights scoreOfOutcomes
-                            in if maxScore + minScore > 0 then Right maxScore
-                               else if maxScore + minScore < 0 then Right minScore
-                                    else Right 0
-
+              maxScore = bestScoreFor turn scoreOfOutcomes
+          in maxScore
+             
 
 bestMove2 :: GameState -> Int -> Maybe Location
 bestMove2 gas@(turn, bigBoard) depth = 
@@ -195,11 +207,5 @@ bestMove2 gas@(turn, bigBoard) depth =
         moves -> 
           let scores = map (`whoMightWin` depth) $ mapMaybe (makeMove gas) moves
           in if length scores /= length moves then error "Should not happen at all"
-             else 
-              let locNout = zip moves scores  
-              in undefined
-                -- if turn == Cross then
-                --   Just $ fst $ maximumBy (comparing `on` snd) locNout -- find mximum in a zipped list using score
-                -- else if turn == Circle then
-                --   Just $ fst $ minimumBy (comparing `on` snd) locNout
-                -- else Nothing
+             else Just $ fst $ bestScoreFor turn $ zip moves scores
+              

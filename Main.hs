@@ -127,17 +127,27 @@ printMakeMove fname move = do
 
 printEvalMove :: Int -> String -> IO ()
 -- VERBOSE
-printEvalMove depth fname = 
-  do
-    game <- loadGame fname
-    let move = case bestMove2 game of 
-      Nothing -> putStr "no best move founded in the case"
-      Just x -> x
-      newGame = case makeMove game move of
-        Nothing -> error "This should not be"
-        Just g -> g
-    in undefined
-  -- do
+printEvalMove depth fname = do
+  return ()
+  game <- loadGame fname
+  -- return ()
+  let move = bestMove2 game depth
+  let turn = fst game
+  case move of 
+    Nothing -> case gameStateWinner game of
+        Nothing -> error "Should not be"
+        Just x -> putStrLn $ "Settled. Result = " ++ show x
+    Just theMove -> do
+      let newGame = case makeMove game theMove of
+                      Nothing -> error "This should not be"
+                      Just g -> g
+      let score = scoreGame newGame
+      if score < 2000 && score > -2000 then do -- no winner
+        let message = "Made move " ++ show move ++ ". Score = " ++ show score
+        putStrLn $ showGameState game $ message
+      else if turn == Cross && score > 0 then putStrLn $ showGameState game "YOU WON!!"
+           else putStrLn $ showGameState game "YOU LOSE :<"
+  -- -- do
   -- putStrLn "Here is Evaluation:"
   -- game <- loadGame fname
   -- -- lack of make the move
